@@ -1,4 +1,4 @@
-const Movies = {
+export const Movies = {
   dates: { maximum: "2024-03-20", minimum: "2024-02-07" },
   page: 1,
   results: [

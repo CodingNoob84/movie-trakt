@@ -12,12 +12,14 @@ export const metadata = {
 };
 
 export default async function RootLayout({ children }) {
-  const session = await auth();
+  //const session = await auth();
   return (
-    <SessionProvider session={session}>
-      <html lang="en">
-        <body className={inter.className}>{children}</body>
-      </html>
-    </SessionProvider>
+    // <SessionProvider session={session}>
+    <html lang="en" className="black">
+      <body className={`${inter.className} bg-black text-white`}>
+        {children}
+      </body>
+    </html>
+    // </SessionProvider>
   );
 }

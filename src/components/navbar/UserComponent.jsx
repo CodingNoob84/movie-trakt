@@ -5,10 +5,17 @@ import { AiOutlineLogout } from "react-icons/ai";
 
 export const UserComponent = () => {
   //console.log("hello");
-  const { data: session } = useSession();
+  //const { data: session } = useSession();
+  const session = {
+    user: {
+      name: "Karthik kumar",
+      email: "karthithelearner@gmail.com",
+      image: "",
+    },
+  };
   console.log(session);
   return (
-    <div className="flex flex-row gap-10 text-white text-xs items-center">
+    <div className="flex flex-row gap-5 text-white text-xs items-center">
       <div className="hidden md:flex flex-col gap-1">
         <div>{session?.user?.name}</div>
         <div>{session?.user?.email}</div>
