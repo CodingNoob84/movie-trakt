@@ -12,7 +12,6 @@ import { useState } from "react";
 
 export const WatchTabs = () => {
   const [tab, setTab] = useState("watching");
-  const [value, setValue] = useState(1);
 
   return (
     <div className="flex flex-col w-full px-4">
@@ -23,7 +22,6 @@ export const WatchTabs = () => {
           }`}
           onClick={() => {
             setTab("watching");
-            setValue(1);
           }}
         >
           Watching
@@ -34,7 +32,6 @@ export const WatchTabs = () => {
           }`}
           onClick={() => {
             setTab("watched");
-            setValue(2);
           }}
         >
           Watched
@@ -74,13 +71,13 @@ export const WatchTabs = () => {
                     <Badge>Crime</Badge>
                   </div>
                   <div className="hidden lg:block">
-                    When the plots of reclusive author Elly Conway's fictional
+                    {`When the plots of reclusive author Elly Conway's fictional
                     espionage novels begin to mirror the covert actions of a
                     real-life spy organization, quiet evenings at home become a
                     thing of the past. Accompanied by her cat Alfie and Aiden, a
                     cat-allergic spy, Elly races across the world to stay one
                     step ahead of the killers as the line between Conway's
-                    fictional world and her real one begins to blur.
+                    fictional world and her real one begins to blur.`}
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -134,13 +131,13 @@ export const WatchTabs = () => {
                     <Badge>Crime</Badge>
                   </div>
                   <div className="hidden lg:block">
-                    When the plots of reclusive author Elly Conway's fictional
+                    {` When the plots of reclusive author Elly Conway's fictional
                     espionage novels begin to mirror the covert actions of a
                     real-life spy organization, quiet evenings at home become a
                     thing of the past. Accompanied by her cat Alfie and Aiden, a
                     cat-allergic spy, Elly races across the world to stay one
                     step ahead of the killers as the line between Conway's
-                    fictional world and her real one begins to blur.
+                    fictional world and her real one begins to blur.`}
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
