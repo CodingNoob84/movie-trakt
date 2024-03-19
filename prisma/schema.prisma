@@ -19,7 +19,10 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt 
   accounts      Account[]
+  watchlists    Watchlist[]
 }
 
 model Account {
@@ -39,4 +42,23 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+}
+
+model Watchlist {
+  id            String   @id @default(cuid())
+  tmdbId        Int      // TMDB ID for the media
+  mediaType     String   // Type of the media, e.g., movie or tv
+  title         String   // Title of the movie or name of the TV show
+  releaseDate   String? // Release date or first air date
+  tmdbRating    Float?    // TMDB rating (vote average)
+  watchStatus   String   // Status, e.g., "list", "watching", "watched"
+  overview      String?  // Overview of the media
+  posterImage   String?  // Path to the poster image
+  backdropImage String?  // Path to the backdrop image
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relationships, if any, e.g., a relation to a User model
+  userId    String
+  user      User @relation(fields: [userId], references: [id])
 }

@@ -23,7 +23,7 @@ const movie = {
 
 export default async function Home() {
   return (
-    <div className="flex flex-col w-full">
+    <div className="flex flex-col gap-6 w-full">
       <HomeBanner />
       <MoviesRow />
       <div className="mt-5 mb-10">

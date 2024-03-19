@@ -14,9 +14,9 @@ import { auth } from "@/lib/auth";
 
 export default async function LoginPage() {
   const session = await auth();
-  console.log("loginsession", session);
+  //console.log("loginsession", session);
   const isLoggedIn = !!session;
-  console.log("login", isLoggedIn);
+  //console.log("login", isLoggedIn);
   if (isLoggedIn) {
     redirect("/");
   }

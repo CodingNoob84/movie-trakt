@@ -3,6 +3,7 @@ import "./globals.css";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { SessionProvider } from "next-auth/react";
+import { ReactQueryProvider } from "@/providers/reactQueryProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -12,14 +13,14 @@ export const metadata = {
 };
 
 export default async function RootLayout({ children }) {
-  //const session = await auth();
+  const session = await auth();
   return (
-    // <SessionProvider session={session}>
-    <html lang="en" className="black">
-      <body className={`${inter.className} bg-black text-white`}>
-        {children}
-      </body>
-    </html>
-    // </SessionProvider>
+    <SessionProvider session={session}>
+      <html lang="en" className="black">
+        <body className={`${inter.className} bg-black text-white`}>
+          <ReactQueryProvider>{children}</ReactQueryProvider>
+        </body>
+      </html>
+    </SessionProvider>
   );
 }
