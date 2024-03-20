@@ -22,9 +22,27 @@ export const getWatchListByUserId = async ({ userId }) => {
   const result = await db.Watchlist.findMany({
     where: {
       userId: userId,
+      watchStatus: "list",
     },
   });
   return result;
+};
+
+export const getWatchHistoryByUserId = async ({ userId }) => {
+  console.log(userId);
+  const watching = await db.Watchlist.findMany({
+    where: {
+      userId: userId,
+      watchStatus: "watching",
+    },
+  });
+  const watched = await db.Watchlist.findMany({
+    where: {
+      userId: userId,
+      watchStatus: "watched",
+    },
+  });
+  return { watching, watched };
 };
 
 export const getWatchStatusforSearch = async ({ userId, tmdbIds }) => {
@@ -41,4 +59,16 @@ export const getWatchStatusforSearch = async ({ userId, tmdbIds }) => {
     },
   });
   return matchingItems;
+};
+
+export const updateWatchStatus = async ({ userId, tmdbId, watchStatus }) => {
+  const result = await db.Watchlist.updateMany({
+    where: {
+      AND: [{ userId: userId }, { tmdbId: tmdbId }],
+    },
+    data: {
+      watchStatus: watchStatus,
+    },
+  });
+  return result;
 };

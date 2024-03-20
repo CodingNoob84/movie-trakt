@@ -51,6 +51,7 @@ model Watchlist {
   title         String   // Title of the movie or name of the TV show
   releaseDate   String? // Release date or first air date
   tmdbRating    Float?    // TMDB rating (vote average)
+  genres        String?        //list of Geners with comma
   watchStatus   String   // Status, e.g., "list", "watching", "watched"
   overview      String?  // Overview of the media
   posterImage   String?  // Path to the poster image

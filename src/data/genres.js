@@ -158,3 +158,15 @@ export const getGenres = (str, type) => {
     .filter((name) => name !== null);
   return genreNames;
 };
+
+export const getGenresString = (str, type) => {
+  const ids = str.split(",").map((id) => parseInt(id));
+  const genreList = type === "movie" ? genres.moviegenres : genres.tvgenres;
+  const genreNames = ids
+    .map((id) => {
+      const genre = genreList.find((genre) => genre.id === id);
+      return genre ? genre.name : null;
+    })
+    .filter((name) => name !== null);
+  return genreNames.join(",");
+};

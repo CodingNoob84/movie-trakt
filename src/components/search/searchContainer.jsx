@@ -11,10 +11,11 @@ export const SearchContainer = ({ searchquery }) => {
   const { data, isLoading } = useQuery({
     queryKey: ["search", { searchquery }],
     queryFn: () => searchwithQuery(searchquery),
+    enabled: searchquery !== "",
   });
 
   const ids = data ? getIdsForSearch(data) : [];
-
+  console.log(data);
   // Ensure the second query is enabled only if `ids` array is not empty and session is available
   const {
     data: watchdata,
@@ -30,7 +31,7 @@ export const SearchContainer = ({ searchquery }) => {
     enabled: !!session?.user?.id && ids.length > 0,
   });
 
-  if (isLoading) {
+  if (isLoading || !data) {
     return (
       <div className="flex flex-row gap-2 lg:gap-4 flex-wrap justify-around">
         {Array.from({ length: 5 }, (_, i) => (
@@ -42,14 +43,19 @@ export const SearchContainer = ({ searchquery }) => {
 
   return (
     <div className="flex flex-row gap-2 lg:gap-4 flex-wrap justify-around">
-      {data?.results.map((searchitem, i) => (
-        <SearchCard
-          key={i}
-          data={searchitem}
-          watchdata={watchdata}
-          refetch={refetch}
-        />
-      ))}
+      {data?.results.map((searchitem, i) => {
+        const matchingWatchData = watchdata?.find(
+          (watchItem) => watchItem.tmdbId === searchitem.id
+        );
+        return (
+          <SearchCard
+            key={i}
+            data={searchitem}
+            watchStatus={matchingWatchData ? matchingWatchData.watchStatus : ""}
+            refetch={refetch}
+          />
+        );
+      })}
     </div>
   );
 };

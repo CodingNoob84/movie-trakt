@@ -24,3 +24,7 @@ export const getIdsForSearch = (data) => {
     .filter((item) => item.media_type === "movie" || item.media_type === "tv")
     .map((item) => item.id);
 };
+
+export const convertGenresString = (array) => {
+  return array;
+};

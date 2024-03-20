@@ -1,16 +1,17 @@
 export const MenuIcon = () => (
   <svg
-    fill="#FFFFFF"
-    stroke="#FFFFFF"
-    className="h-8 w-8 bg-black"
     xmlns="http://www.w3.org/2000/svg"
+    className="h-7 w-7 text-white"
+    fill="none"
     viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth="2"
   >
-    <g>
-      <path d="M12.03,80.303h360.909c6.641,0,12.03-5.39,12.03-12.03s-5.39-12.03-12.03-12.03H12.03c-6.641,0-12.03,5.39-12.03,12.03S5.39,80.303,12.03,80.303z" />
-      <path d="M12.03,180.455h240.909c6.641,0,12.03-5.39,12.03-12.03s-5.39-12.03-12.03-12.03H12.03c-6.641,0-12.03,5.39-12.03,12.03S5.39,180.455,12.03,180.455z" />
-      <path d="M12.03,280.607h120.909c6.641,0,12.03-5.39,12.03-12.03s-5.39-12.03-12.03-12.03H12.03c-6.641,0-12.03,5.39-12.03,12.03S5.39,280.607,12.03,280.607z" />
-    </g>
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M4 6h16M4 12h16M4 18h7"
+    ></path>
   </svg>
 );
 

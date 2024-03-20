@@ -3,12 +3,13 @@ import { Badge } from "../ui/badge";
 import { RatingIcon } from "@/lib/icons";
 import { Button } from "../ui/button";
 import { getTmDBImage, getYear } from "@/lib/utils";
-import { getGenres } from "@/data/genres";
+import { getGenres, getGenresString } from "@/data/genres";
 import { Skeleton } from "../ui/skeleton";
 import { useSession } from "next-auth/react";
 import { addToWatchList, removeFromWatchList } from "@/services/serveractions";
 
-export const SearchCard = ({ data, watchdata, refetch }) => {
+export const SearchCard = ({ data, watchStatus, refetch }) => {
+  console.log(watchStatus);
   const { data: session } = useSession();
   if (data.media_type === "person") {
     return;
@@ -22,6 +23,7 @@ export const SearchCard = ({ data, watchdata, refetch }) => {
       releaseDate: data?.release_date || data?.first_air_date,
       tmdbRating: data?.vote_average,
       watchStatus: "list",
+      genres: getGenresString(data.genre_ids.join(","), data.media_type),
       overview: data.overview,
       posterImage: data.poster_path,
       backdropImage: data.backdrop_path,
@@ -43,12 +45,55 @@ export const SearchCard = ({ data, watchdata, refetch }) => {
       refetch();
     }
   };
+
+  const getButtonBasedOnWatchStatus = () => {
+    switch (watchStatus) {
+      case "list":
+        return (
+          <Button
+            size={"sm"}
+            className="bg-blue-600 hover:bg-blue-400 w-full"
+            onClick={() => handleRemove}
+          >
+            In the Watchlist
+          </Button>
+        );
+      case "watching":
+        return (
+          <Button
+            size={"sm"}
+            className="bg-yellow-600 hover:bg-yellow-400 w-full"
+          >
+            Watching
+          </Button>
+        );
+      case "watched":
+        return (
+          <Button
+            size={"sm"}
+            className="bg-green-600 hover:bg-green-400 w-full"
+          >
+            Watched
+          </Button>
+        );
+      default:
+        return (
+          <Button
+            size={"sm"}
+            className="bg-red-600 hover:bg-red-400 w-full"
+            onClick={() => handleWatchlist}
+          >
+            Add to WatchList
+          </Button>
+        );
+    }
+  };
   return (
     <div className="flex flex-col w-[160px] gap-1 border rounded-xl shadow-xl">
       <Link href="/detail" className="">
         <div className="overflow-hidden rounded-xl w-full h-64">
           <img
-            src={`${getTmDBImage(data?.poster_path)}`}
+            src={`${getTmDBImage(data?.poster_path || data?.backdrop_path)}`}
             className="object-cover transition-transform duration-300 hover:scale-125 cursor-pointer w-full h-full"
             alt={data?.title || data?.name}
           />
@@ -78,23 +123,7 @@ export const SearchCard = ({ data, watchdata, refetch }) => {
           )}
         </div>
 
-        {watchdata?.some((item) => item.tmdbId === data.id) ? (
-          <Button
-            size={"sm"}
-            className="bg-green-600 hover:bg-green-400 w-full"
-            onClick={() => handleRemove()}
-          >
-            In the Watchlist
-          </Button>
-        ) : (
-          <Button
-            size={"sm"}
-            className="bg-red-600 hover:bg-red-400 w-full"
-            onClick={() => handleWatchlist()}
-          >
-            Add to WatchList
-          </Button>
-        )}
+        {getButtonBasedOnWatchStatus()}
       </div>
     </div>
   );
