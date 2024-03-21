@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { SearchCard, SearchCardLoader } from "../common/searchcard";
 import { getIdsForSearch } from "@/lib/utils";
-import { getWatchStatusforSearch } from "@/services/serveractions";
+import { getWatchStatus } from "@/services/serveractions";
 import { searchwithQuery } from "@/services/tmdb";
 
 export const SearchContainer = ({ searchquery }) => {
@@ -24,7 +24,7 @@ export const SearchContainer = ({ searchquery }) => {
   } = useQuery({
     queryKey: ["searchwatch", { userId: session?.user?.id, tmdbIds: ids }],
     queryFn: () =>
-      getWatchStatusforSearch({
+      getWatchStatus({
         userId: session?.user?.id,
         tmdbIds: ids,
       }),

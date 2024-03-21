@@ -29,7 +29,6 @@ export const getWatchListByUserId = async ({ userId }) => {
 };
 
 export const getWatchHistoryByUserId = async ({ userId }) => {
-  console.log(userId);
   const watching = await db.Watchlist.findMany({
     where: {
       userId: userId,
@@ -45,7 +44,7 @@ export const getWatchHistoryByUserId = async ({ userId }) => {
   return { watching, watched };
 };
 
-export const getWatchStatusforSearch = async ({ userId, tmdbIds }) => {
+export const getWatchStatus = async ({ userId, tmdbIds }) => {
   const matchingItems = await prisma.watchlist.findMany({
     where: {
       userId: userId,
@@ -62,6 +61,23 @@ export const getWatchStatusforSearch = async ({ userId, tmdbIds }) => {
 };
 
 export const updateWatchStatus = async ({ userId, tmdbId, watchStatus }) => {
+  console.log("status", watchStatus);
+  if (watchStatus === "watching") {
+    // Count how many movies are already set to "watching"
+    const watchingCount = await db.Watchlist.count({
+      where: {
+        userId: userId,
+        watchStatus: "watching",
+      },
+    });
+
+    // If there are already 5 movies set to "watching", prevent the update or handle accordingly
+    if (watchingCount >= 5) {
+      //console.log("User has reached the limit of 5 movies set to watching.");
+      return { msg: "limitreached" }; // Or throw an error or handle this case as needed
+    }
+  }
+
   const result = await db.Watchlist.updateMany({
     where: {
       AND: [{ userId: userId }, { tmdbId: tmdbId }],
@@ -70,5 +86,7 @@ export const updateWatchStatus = async ({ userId, tmdbId, watchStatus }) => {
       watchStatus: watchStatus,
     },
   });
-  return result;
+  console.log(result);
+
+  return { msg: "sucess", result };
 };

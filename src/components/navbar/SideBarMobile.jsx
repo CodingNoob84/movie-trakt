@@ -13,6 +13,7 @@ import {
 } from "@/lib/icons";
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetDescription,
   SheetHeader,
@@ -102,18 +103,19 @@ export const SideBarMobile = () => {
                     {menu.label}
                   </div>
                   {menu.items.map((submenu, j) => (
-                    <Link
-                      key={j}
-                      className={`flex items-center space-x-2 py-1  hover:text-red-600  font-semibold hover:border-r-4 hover:border-r-red-600 hover:font-semibold  ${
-                        pathname === submenu.link
-                          ? "text-red-600 border-r-4 border-r-red-600"
-                          : "text-white"
-                      }  pr-20`}
-                      href={submenu.link}
-                    >
-                      {submenu.icon}
-                      <span>{submenu.label}</span>
-                    </Link>
+                    <SheetClose key={j} asChild>
+                      <Link
+                        className={`flex items-center space-x-2 py-1  hover:text-red-600  font-semibold hover:border-r-4 hover:border-r-red-600 hover:font-semibold  ${
+                          pathname === submenu.link
+                            ? "text-red-600 border-r-4 border-r-red-600"
+                            : "text-white"
+                        }  pr-20`}
+                        href={submenu.link}
+                      >
+                        {submenu.icon}
+                        <span>{submenu.label}</span>
+                      </Link>
+                    </SheetClose>
                   ))}
                 </div>
               ))}

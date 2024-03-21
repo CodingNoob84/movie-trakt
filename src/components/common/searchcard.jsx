@@ -53,7 +53,7 @@ export const SearchCard = ({ data, watchStatus, refetch }) => {
           <Button
             size={"sm"}
             className="bg-blue-600 hover:bg-blue-400 w-full"
-            onClick={() => handleRemove}
+            onClick={() => handleRemove()}
           >
             In the Watchlist
           </Button>
@@ -81,7 +81,7 @@ export const SearchCard = ({ data, watchStatus, refetch }) => {
           <Button
             size={"sm"}
             className="bg-red-600 hover:bg-red-400 w-full"
-            onClick={() => handleWatchlist}
+            onClick={() => handleWatchlist()}
           >
             Add to WatchList
           </Button>

@@ -1,3 +1,9 @@
+import { TvShows } from "@/components/movies/tvshows";
+
 export default function TVShowsPage() {
-  return <div>tv shows</div>;
+  return (
+    <div>
+      <TvShows />
+    </div>
+  );
 }

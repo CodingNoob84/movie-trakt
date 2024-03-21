@@ -41,25 +41,12 @@ const movie = {
   vote_count: 2158,
 };
 
-export const MoviesRow = () => {
+export const MoviesRow = ({ title, data }) => {
   const options = {
     align: "start",
     loop: "true",
   };
   const [api, setApi] = useState();
-  // const [openDropdown, setOpenDropdown] = useState(null);
-
-  // const handleDropdownClick = (dropdownId) => {
-  //   if (openDropdown === dropdownId) {
-  //     // Close the dropdown if it's already open
-  //     setOpenDropdown(null);
-  //   } else {
-  //     // Close the currently open dropdown and open the new one
-  //     setOpenDropdown(dropdownId);
-  //   }
-  // };
-  //console.log(api);
-  //const [emblaRef, emblaApi] = useEmblaCarousel(options);
   return (
     <>
       <section className="h-[500px] w-full">

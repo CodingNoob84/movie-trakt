@@ -1,17 +1,15 @@
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { ViewSwitch } from "@/components/common/viewswitch";
 import { WatchTabs } from "@/components/watchhistory/watchtabs";
-import { RatingIcon } from "@/lib/icons";
 
 export default function WatchHistoryPage() {
   return (
-    <div className="w-full">
+    <div className="flex flex-col gap-4 w-full ">
+      <div className="flex flex-row justify-between">
+        <div className="text-2xl font-bold">Watch History</div>
+        <div>
+          <ViewSwitch />
+        </div>
+      </div>
       <WatchTabs />
     </div>
   );

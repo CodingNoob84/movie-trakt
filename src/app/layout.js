@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { SessionProvider } from "next-auth/react";
 import { ReactQueryProvider } from "@/providers/reactQueryProvider";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,6 +20,7 @@ export default async function RootLayout({ children }) {
       <html lang="en" className="black">
         <body className={`${inter.className} bg-black text-white`}>
           <ReactQueryProvider>{children}</ReactQueryProvider>
+          <Toaster richColors />
         </body>
       </html>
     </SessionProvider>

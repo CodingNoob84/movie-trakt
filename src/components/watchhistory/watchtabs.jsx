@@ -1,70 +1,70 @@
 "use client";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { RatingIcon } from "@/lib/icons";
-import { getWatchHistoryByUserId } from "@/services/serveractions";
+import { useState, useContext } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
-import { WatchCard, WatchCardLoader } from "../common/watchcard";
+import { getWatchHistoryByUserId } from "@/services/serveractions";
+import {
+  WatchBigCard,
+  WatchBigCardLoader,
+  WatchSmallCard,
+  WatchSmallCardLoader,
+} from "../common/watchcard";
+import useViewStore from "@/store/viewstore";
 
 export const WatchTabs = () => {
   const { data: session } = useSession();
   const [tab, setTab] = useState("watching");
+  // Using a hypothetical useContext hook to retrieve the current view state
+  const { view } = useViewStore(); // Assume this context provides the current view ("small" or "big")
+
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["watchhistory", { userId: session.user.id }],
     queryFn: () => getWatchHistoryByUserId(session.user.id),
   });
-  if (!isLoading) {
-    console.log(data);
-  }
+
+  const renderWatchCards = (items) => {
+    return items.map((item, i) =>
+      view === "small" ? (
+        <WatchSmallCard key={i} data={item} refetch={refetch} />
+      ) : (
+        <WatchBigCard key={i} data={item} refetch={refetch} />
+      )
+    );
+  };
 
   return (
-    <div className="flex flex-col gap-4 w-full px-4">
+    <div className="flex flex-col gap-4 w-full">
       <div className="flex flex-row h-[40px] w-full">
-        <div
-          className={`w-full text-center cursor-pointer ${
-            tab === "watching" && "border-b-4 border-red-600"
-          }`}
-          onClick={() => {
-            setTab("watching");
-          }}
-        >
-          Watching
-        </div>
-        <div
-          className={`w-full text-center cursor-pointer ${
-            tab === "watched" && "border-b-4 border-red-600"
-          }`}
-          onClick={() => {
-            setTab("watched");
-          }}
-        >
-          Watched
-        </div>
+        {["watching", "watched"].map((type) => (
+          <div
+            key={type}
+            className={`w-full text-center cursor-pointer ${
+              tab === type && "border-b-4 border-red-600"
+            }`}
+            onClick={() => setTab(type)}
+          >
+            {type === "watching" ? "Watching" : "Watched"}
+          </div>
+        ))}
       </div>
-      <div className="w-full p-2">
-        {tab === "watching" ? (
-          <div className="flex flex-col gap-4">
-            {isLoading
-              ? Array.from({ length: 5 }, (_, i) => <WatchCardLoader key={i} />)
-              : data?.watching?.map((item, i) => (
-                  <WatchCard key={i} data={item} refetch={refetch} />
-                ))}
+      <div className="w-full">
+        {isLoading ? (
+          <div className="flex flex-row justify-evenly gap-4 flex-wrap">
+            {Array.from({ length: 5 }, (_, i) =>
+              view === "small" ? (
+                <WatchSmallCardLoader key={i} />
+              ) : (
+                <WatchBigCardLoader key={i} />
+              )
+            )}
+          </div>
+        ) : tab === "watching" ? (
+          <div className="flex flex-row justify-evenly gap-4 flex-wrap">
+            {renderWatchCards(data?.watching || [])}
           </div>
         ) : (
-          <div className="flex flex-col gap-4">
-            {isLoading
-              ? Array.from({ length: 5 }, (_, i) => <WatchCardLoader key={i} />)
-              : data?.watched?.map((item, i) => (
-                  <WatchCard key={i} data={item} refetch={refetch} />
-                ))}
+          <div className="flex flex-row justify-evenly gap-4 flex-wrap">
+            {renderWatchCards(data?.watched || [])}
           </div>
         )}
       </div>
