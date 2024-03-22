@@ -41,6 +41,7 @@ export const HomeBanner = () => {
       }),
     enabled: !!session?.user?.id && ids.length > 0,
   });
+  console.log("watchdata", watchdata);
   const [api, setApi] = useState();
   const autoplay = api?.plugins()?.autoplay;
   //console.log("api", api);

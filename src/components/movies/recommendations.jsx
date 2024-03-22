@@ -1,16 +1,16 @@
 "use client";
 import { getIdsForSearch } from "@/lib/utils";
 import { getWatchStatus } from "@/services/serveractions";
-import { getTrendingMovies } from "@/services/tmdb";
+import { getMovieRecommendations } from "@/services/tmdb";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
-import { MoviesRow } from "./moviesrow";
+import { MoviesRow } from "../home/moviesrow";
 
-export const TrendingMovies = () => {
+export const Recommendations = ({ tmdbId }) => {
   const { data: session } = useSession();
   const { data, isLoading } = useQuery({
-    queryKey: ["trendingmovies"],
-    queryFn: () => getTrendingMovies(),
+    queryKey: ["recommendations", { tmdbId: tmdbId }],
+    queryFn: () => getMovieRecommendations(tmdbId),
   });
 
   const ids = data ? getIdsForSearch(data) : [];
@@ -20,7 +20,10 @@ export const TrendingMovies = () => {
     isLoading: isWatchStatusLoading,
     refetch,
   } = useQuery({
-    queryKey: ["trendingmovies", { userId: session?.user?.id, tmdbIds: ids }],
+    queryKey: [
+      "recommendationswatch",
+      { userId: session?.user?.id, tmdbIds: ids },
+    ],
     queryFn: () =>
       getWatchStatus({
         userId: session?.user?.id,
@@ -28,12 +31,12 @@ export const TrendingMovies = () => {
       }),
     enabled: !!session?.user?.id && ids.length > 0,
   });
-  //console.log(data);
-  console.log("watchdata-trendingmovies", watchdata);
+  console.log(data);
+  console.log(watchdata);
   return (
     <>
       <MoviesRow
-        title={"Trending Movies"}
+        title={"Similar Movies"}
         data={data}
         watchdata={watchdata}
         refetch={refetch}

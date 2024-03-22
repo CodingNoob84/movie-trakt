@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { getMovieDetailfromTmdb } from "./tmdb";
 
 export const addToWatchList = async (data) => {
   const { userId, tmdbId, watchStatus, ...movieDetails } = data;
@@ -201,6 +202,21 @@ export const updateWatchStatus = async ({ userId, tmdbId, watchStatus }) => {
   return { msg: "success", result };
 };
 
-// export const getMovieDetails=async(tmdbId)=>{
+export const getMovieDetails = async ({ tmdbId, userId }) => {
+  //console.log(tmdbId, userId);
+  let movie = await db.movie.findFirst({
+    where: { tmdbId },
+  });
 
-// }
+  if (!movie) {
+    const result = await getMovieDetailfromTmdb(tmdbId);
+    return result;
+  }
+  const watchdata = await db.watchlist.findFirst({
+    where: {
+      userId,
+      tmdbId,
+    },
+  });
+  return { ...movie, ...watchdata };
+};

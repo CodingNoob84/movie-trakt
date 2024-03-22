@@ -28,8 +28,8 @@ export const Movies = () => {
       }),
     enabled: !!session?.user?.id && ids.length > 0,
   });
-  console.log(data);
-  console.log(watchdata);
+  //console.log(data);
+  //console.log(watchdata);
   return (
     <div className="flex flex-row flex-wrap justify-evenly gap-4">
       {data?.results.map((movie, i) => {
