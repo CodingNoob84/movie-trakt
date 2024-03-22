@@ -8,6 +8,7 @@ import { MoviesRow } from "./moviesrow";
 
 export const TrendingMovies = () => {
   const { data: session } = useSession();
+  console.log("session", session);
   const { data, isLoading } = useQuery({
     queryKey: ["trendingmovies"],
     queryFn: () => getTrendingMovies(),
