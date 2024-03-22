@@ -15,6 +15,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getIdsForSearch } from "@/lib/utils";
 import { getTrending } from "@/services/tmdb";
 import { getWatchStatus } from "@/services/serveractions";
+import { useState } from "react";
 
 const baseURL = "https://image.tmdb.org/t/p/w500";
 
@@ -26,7 +27,7 @@ export const HomeBanner = () => {
   });
 
   const ids = data ? getIdsForSearch(data) : [];
-  console.log(data);
+  //console.log(data);
   const {
     data: watchdata,
     isLoading: isWatchStatusLoading,
@@ -40,7 +41,10 @@ export const HomeBanner = () => {
       }),
     enabled: !!session?.user?.id && ids.length > 0,
   });
-  //console.log(watchdata);
+  const [api, setApi] = useState();
+  const autoplay = api?.plugins()?.autoplay;
+  //console.log("api", api);
+  //console.log("api", api?.plugins()?.autoplay);
 
   if (isLoading || !data) {
     return <HomeBannerCardLoader />;
@@ -57,6 +61,7 @@ export const HomeBanner = () => {
             delay: 5000,
           }),
         ]}
+        setApi={setApi}
       >
         <CarouselContent>
           {!isLoading &&
@@ -72,6 +77,7 @@ export const HomeBanner = () => {
                       matchingWatchData ? matchingWatchData.watchStatus : ""
                     }
                     refetch={refetch}
+                    autoplay={autoplay}
                   />
                 </CarouselItem>
               );

@@ -43,7 +43,7 @@ export const ListTabs = () => {
     queryKey: ["watchlist", { userId: session.user.id }],
     queryFn: () => getWatchListByUserId(session.user.id),
   });
-
+  //console.log(data);
   const filteredData = getMovieTvData(data || [], tab);
 
   return (

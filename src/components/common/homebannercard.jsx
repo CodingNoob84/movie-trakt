@@ -2,75 +2,152 @@
 import { getGenresString } from "@/data/genres";
 import { IMDBIcon } from "@/lib/icons";
 import { getTmDBImage } from "@/lib/utils";
-import { addToWatchList } from "@/services/serveractions";
+import {
+  addToWatchList,
+  removeFromWatchList,
+  updateWatchStatus,
+} from "@/services/serveractions";
 import { useSession } from "next-auth/react";
 import { Skeleton } from "../ui/skeleton";
 import { Button } from "../ui/button";
+import { DropdownMenu } from "@radix-ui/react-dropdown-menu";
+import {
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { toast } from "sonner";
 
-export const HomeBannerCard = ({ data, watchStatus, refetch }) => {
-  const { data: session } = useSession();
-  const handleWatchlist = async () => {
-    const newData = {
-      userId: session.user.id,
-      tmdbId: data.id,
-      mediaType: data.media_type,
-      title: data?.title || data?.name,
-      releaseDate: data?.release_date || data?.first_air_date,
-      tmdbRating: data?.vote_average,
-      watchStatus: "list",
-      genres: getGenresString(data.genre_ids.join(","), data.media_type),
-      overview: data.overview,
-      posterImage: data.poster_path,
-      backdropImage: data.backdrop_path,
-    };
-    //console.log(newData);
-    const result = await addToWatchList(newData);
-    if (result) {
-      refetch();
-    }
-    //console.log(result);
+const DropdownMenuActions = ({ watchStatus, handleAction }) => {
+  const menuItems = {
+    list: [
+      {
+        text: "Remove from List",
+        action: () => handleAction("delete", "remove"),
+      },
+      {
+        text: "Mark as Watched",
+        action: () => handleAction("update", "watched"),
+      },
+      {
+        text: "Start Watching",
+        action: () => handleAction("update", "watching"),
+      },
+    ],
+    watching: [
+      { text: "Watch Later", action: () => handleAction("update", "list") },
+      {
+        text: "Mark as Watched",
+        action: () => handleAction("update", "watched"),
+      },
+      { text: "Skip / Delete", action: () => handleAction("delete", "delete") },
+    ],
+    watched: [
+      { text: "Watch Again", action: () => handleAction("update", "watching") },
+      { text: "Move to List", action: () => handleAction("update", "list") },
+      {
+        text: "Delete from Watched",
+        action: () => handleAction("delete", "delete"),
+      },
+    ],
   };
 
-  const getButtonBasedOnWatchStatus = () => {
-    switch (watchStatus) {
-      case "list":
-        return (
-          <Button
-            size={"sm"}
-            className="bg-blue-600 hover:bg-blue-400 w-full"
-            onClick={() => handleRemove()}
+  const items = menuItems[watchStatus] || [
+    { text: "Add to Watchlist", action: () => handleAction("add", "list") },
+    { text: "Mark as Watched", action: () => handleAction("add", "watched") },
+    { text: "Start Watching", action: () => handleAction("add", "watching") },
+  ];
+
+  const ButtonContent = {
+    list: {
+      text: "In the WatchList",
+      color: "bg-blue-500 hover:bg-blue-600",
+    },
+    watching: {
+      text: "Watching now",
+      color: "bg-yellow-500 hover:bg-yellow-600",
+    },
+    watched: {
+      text: "Watched",
+      color: "bg-green-500 hover:bg-green-600",
+    },
+  };
+  const button = ButtonContent[watchStatus] || {
+    text: "Add to WatchList",
+    color: "bg-red-500 hover:bg-red-600",
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button size="sm" className={`w-full ${button.color}`}>
+          {button.text}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="bg-black text-white">
+        {items.map((item, index) => (
+          <DropdownMenuItem
+            key={index}
+            onClick={item.action}
+            className="hover:bg-gray-700"
           >
-            In the Watchlist
-          </Button>
-        );
-      case "watching":
-        return (
-          <Button
-            size={"sm"}
-            className="bg-yellow-600 hover:bg-yellow-400 w-full"
-          >
-            Watching
-          </Button>
-        );
-      case "watched":
-        return (
-          <Button
-            size={"sm"}
-            className="bg-green-600 hover:bg-green-400 w-full"
-          >
-            Watched
-          </Button>
-        );
-      default:
-        return (
-          <Button
-            size={"sm"}
-            className="bg-red-600 hover:bg-red-400 w-full"
-            onClick={() => handleWatchlist()}
-          >
-            Add to WatchList
-          </Button>
-        );
+            {item.text}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
+export const HomeBannerCard = ({ data, watchStatus, refetch, autoplay }) => {
+  const { data: session } = useSession();
+  const prepareData = (status) => ({
+    userId: session.user.id,
+    tmdbId: data.id,
+    mediaType: data.media_type,
+    title: data?.title || data?.name,
+    releaseDate: data?.release_date || data?.first_air_date,
+    tmdbRating: data?.vote_average,
+    watchStatus: status,
+    genres: getGenresString(data.genre_ids.join(","), data.media_type),
+    overview: data.overview,
+    posterImage: data.poster_path,
+    backdropImage: data.backdrop_path,
+  });
+
+  const handleAction = async (action, status) => {
+    try {
+      let response;
+      if (action === "add") {
+        response = await addToWatchList(prepareData(status));
+      } else if (action === "update") {
+        response = await updateWatchStatus({
+          tmdbId: data.id,
+          userId: session.user.id,
+          watchStatus: status,
+        });
+      } else if (action === "delete") {
+        response = await removeFromWatchList({
+          tmdbId: data.id,
+          userId: session.user.id,
+        });
+      }
+
+      if (response?.msg === "limitreached") {
+        toast.warning("Maximum 5 movies can be marked as Watching");
+      } else if (action === "delete") {
+        // Show success message specifically for delete action
+        refetch();
+        toast.error("Removed from watchlist/watch history");
+      } else {
+        // General success message for other actions
+        refetch();
+        toast.success(`Movie marked as ${status}`);
+      }
+      autoplay.play();
+    } catch (error) {
+      console.error(`Failed to ${action} watch status:`, error);
+      toast.error(`Failed to ${action} watch status.`);
     }
   };
   return (
@@ -96,7 +173,13 @@ export const HomeBannerCard = ({ data, watchStatus, refetch }) => {
           </span>
         </div>
         <div className="text-xs text-gray-200 lg:w-2/4">{data?.overview}</div>
-        <div className="flex w-1/4">{getButtonBasedOnWatchStatus()}</div>
+        <div className="flex lg:w-1/4">
+          {" "}
+          <DropdownMenuActions
+            watchStatus={watchStatus}
+            handleAction={handleAction}
+          />
+        </div>
         {/* <div className="flex -space-x-1 items-center ">
             <img
               className="rounded-full w-7 h-7 shadow-lg border border-white"

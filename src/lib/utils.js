@@ -7,7 +7,7 @@ export function cn(...inputs) {
 
 export const getTmDBImage = (image) => {
   if (!image) {
-    return "";
+    return "/noposter.PNG";
   }
   return `https://image.tmdb.org/t/p/w500${image}`;
 };

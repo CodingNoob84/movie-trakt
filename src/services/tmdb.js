@@ -42,3 +42,8 @@ export const getTrendingTvshows = async () => {
   const url = `${BaseTmdbUrl}/3/trending/tv/day?language=en-US`;
   return await fetchData(url);
 };
+
+export const getMovieDetails = async (tmdbId) => {
+  const url = `${BaseTmdbUrl}/3/movie/${tmdbId}?language=en-US`;
+  return await fetchData(url);
+};

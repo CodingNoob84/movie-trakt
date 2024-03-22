@@ -16,120 +16,114 @@ import {
   removeFromWatchList,
   updateWatchStatus,
 } from "@/services/serveractions";
-import { useState } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
+
+const DropdownMenuActions = ({ watchStatus, handleAction }) => {
+  const menuItems = {
+    list: [
+      {
+        text: "Remove from List",
+        action: () => handleAction("delete", "remove"),
+      },
+      {
+        text: "Mark as Watched",
+        action: () => handleAction("update", "watched"),
+      },
+      {
+        text: "Start Watching",
+        action: () => handleAction("update", "watching"),
+      },
+    ],
+    watching: [
+      { text: "Watch Later", action: () => handleAction("update", "list") },
+      {
+        text: "Mark as Watched",
+        action: () => handleAction("update", "watched"),
+      },
+      { text: "Skip / Delete", action: () => handleAction("delete", "delete") },
+    ],
+    watched: [
+      { text: "Watch Again", action: () => handleAction("update", "watching") },
+      { text: "Move to List", action: () => handleAction("update", "list") },
+      {
+        text: "Delete from Watched",
+        action: () => handleAction("delete", "delete"),
+      },
+    ],
+  };
+
+  const items = menuItems[watchStatus];
+
+  const ButtonContent = {
+    list: {
+      text: "In the WatchList",
+      color: "bg-blue-500 hover:bg-blue-600",
+    },
+    watching: {
+      text: "Watching now",
+      color: "bg-yellow-500 hover:bg-yellow-600",
+    },
+    watched: {
+      text: "Watched",
+      color: "bg-green-500 hover:bg-green-600",
+    },
+  };
+  const button = ButtonContent[watchStatus];
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button size="sm" className={`w-full ${button.color}`}>
+          {button.text}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="bg-black text-white">
+        {items.map((item, index) => (
+          <DropdownMenuItem
+            key={index}
+            onClick={item.action}
+            className="hover:bg-gray-700"
+          >
+            {item.text}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
 
 export const WatchBigCard = ({ data, refetch }) => {
-  const [isUpdating, setIsUpdating] = useState(false);
-
-  const handleWatchStatusChange = async (newStatus) => {
-    setIsUpdating(true);
+  const handleAction = async (action, status) => {
     try {
-      const result = await updateWatchStatus({
-        tmdbId: data.tmdbId,
-        userId: data.userId,
-        watchStatus: newStatus,
-      });
-      console.log(result);
-      refetch();
-    } catch (error) {
-      console.error("Failed to update watch status:", error);
-    }
-    setIsUpdating(false);
-  };
+      let response;
+      if (action === "update") {
+        response = await updateWatchStatus({
+          tmdbId: data.tmdbId,
+          userId: data.userId,
+          watchStatus: status,
+        });
+      } else if (action === "delete") {
+        response = await removeFromWatchList({
+          tmdbId: data.tmdbId,
+          userId: data.userId,
+        });
+      }
 
-  const handleRemoveFromWatchList = async () => {
-    setIsUpdating(true);
-    try {
-      await removeFromWatchList({ tmdbId: data.tmdbId, userId: data.userId });
-      refetch();
+      if (response?.msg === "limitreached") {
+        toast.warning("Maximum 5 movies can be marked as Watching");
+      } else if (action === "delete") {
+        // Show success message specifically for delete action
+        refetch();
+        toast.error("Removed from watchlist/watch history");
+      } else {
+        // General success message for other actions
+        refetch();
+        toast.success(`Movie marked as ${status}`);
+      }
     } catch (error) {
-      console.error("Failed to remove from watchlist:", error);
-    }
-    setIsUpdating(false);
-  };
-
-  const getDropdownMenu = () => {
-    if (isUpdating) {
-      return <Skeleton className="w-full h-10" />;
-    }
-    //console.log(data.watchStatus);
-    switch (data.watchStatus) {
-      case "list":
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                size={"sm"}
-                className="bg-blue-500 hover:bg-blue-600 w-full"
-              >
-                In the Watchlist
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-black text-white">
-              <DropdownMenuItem onClick={() => handleRemoveFromWatchList()}>
-                Remove from List
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleWatchStatusChange("watched")}
-              >
-                Watched
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleWatchStatusChange("watching")}
-              >
-                Watch Now
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        );
-      case "watching":
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                size={"sm"}
-                className={`bg-green-500 hover:bg-green-600 w-full`}
-              >
-                Watching Now
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-black text-white">
-              <DropdownMenuItem className="hover:bg-green-600">
-                Watch Later
-              </DropdownMenuItem>
-              <DropdownMenuItem className="hover:bg-green-600">
-                Watched
-              </DropdownMenuItem>
-              <DropdownMenuItem className="hover:bg-green-600">
-                Skip
-              </DropdownMenuItem>
-              <DropdownMenuItem className="hover:bg-green-600">
-                Boring
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        );
-      case "watched":
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                size={"sm"}
-                className={`bg-red-500 hover:bg-red-600 w-full`}
-              >
-                Watched
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-black text-white">
-              <DropdownMenuItem className="hover:bg-red-600">
-                Remove from Watched
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        );
-      default:
-        return null; // or some default JSX
+      console.error(`Failed to ${action} watch status:`, error);
+      toast.error(`Failed to ${action} watch status.`);
     }
   };
 
@@ -178,7 +172,10 @@ export const WatchBigCard = ({ data, refetch }) => {
             ))}
           </div>
           <div className="hidden lg:block">{data.overview}</div>
-          {getDropdownMenu()}
+          <DropdownMenuActions
+            watchStatus={data.watchStatus}
+            handleAction={handleAction}
+          />
 
           <div className="text-xs">{getWatchDate()} </div>
         </div>
@@ -221,135 +218,36 @@ export const WatchBigCardLoader = () => {
 };
 
 export const WatchSmallCard = ({ data, refetch }) => {
-  const [isUpdating, setIsUpdating] = useState(false);
-  //console.log(data);
-  const handleWatchStatusChange = async (newStatus) => {
-    setIsUpdating(true);
-    console.log(newStatus);
+  const handleAction = async (action, status) => {
     try {
-      const result = await updateWatchStatus({
-        tmdbId: data.tmdbId,
-        userId: data.userId,
-        watchStatus: newStatus,
-      });
-      console.log(result);
-      refetch();
-    } catch (error) {
-      console.error("Failed to update watch status:", error);
-    }
-    setIsUpdating(false);
-  };
+      let response;
+      if (action === "update") {
+        response = await updateWatchStatus({
+          tmdbId: data.tmdbId,
+          userId: data.userId,
+          watchStatus: status,
+        });
+      } else if (action === "delete") {
+        response = await removeFromWatchList({
+          tmdbId: data.tmdbId,
+          userId: data.userId,
+        });
+      }
 
-  const handleRemoveFromWatchList = async () => {
-    setIsUpdating(true);
-    try {
-      await removeFromWatchList({ tmdbId: data.tmdbId, userId: data.userId });
-      refetch();
+      if (response?.msg === "limitreached") {
+        toast.warning("Maximum 5 movies can be marked as Watching");
+      } else if (action === "delete") {
+        // Show success message specifically for delete action
+        refetch();
+        toast.error("Removed from watchlist/watch history");
+      } else {
+        // General success message for other actions
+        refetch();
+        toast.success(`Movie marked as ${status}`);
+      }
     } catch (error) {
-      console.error("Failed to remove from watchlist:", error);
-    }
-    setIsUpdating(false);
-  };
-
-  const getDropdownMenu = () => {
-    if (isUpdating) {
-      return <Skeleton className="w-full h-10" />;
-    }
-    //console.log(data.watchStatus);
-    switch (data.watchStatus) {
-      case "list":
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                size={"sm"}
-                className="bg-blue-500 hover:bg-blue-600 w-full"
-              >
-                In the Watchlist
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-black text-white">
-              <DropdownMenuItem onClick={() => handleRemoveFromWatchList()}>
-                Remove from List
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleWatchStatusChange("watched")}
-              >
-                Watched
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleWatchStatusChange("watching")}
-              >
-                Watch Now
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        );
-      case "watching":
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                size={"sm"}
-                className={`bg-green-500 hover:bg-green-600 w-full`}
-              >
-                Watching Now
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-black text-white">
-              <DropdownMenuItem
-                className="hover:bg-green-600"
-                onClick={() => handleWatchStatusChange("list")}
-              >
-                Watch Later
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="hover:bg-green-600"
-                onClick={() => handleWatchStatusChange("watched")}
-              >
-                Watched
-              </DropdownMenuItem>
-              <DropdownMenuItem className="hover:bg-green-600">
-                Skip / Delete
-              </DropdownMenuItem>
-              <DropdownMenuItem className="hover:bg-green-600">
-                Boring
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        );
-      case "watched":
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                size={"sm"}
-                className={`bg-red-500 hover:bg-red-600 w-full`}
-              >
-                Watched
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-black text-white">
-              <DropdownMenuItem
-                className="hover:bg-red-600"
-                onClick={() => handleWatchStatusChange("watched")}
-              >
-                Watch again
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="hover:bg-red-600"
-                onClick={() => handleWatchStatusChange("list")}
-              >
-                Watched to List
-              </DropdownMenuItem>
-              <DropdownMenuItem className="hover:bg-red-600">
-                Delete from Watched
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        );
-      default:
-        return null; // or some default JSX
+      console.error(`Failed to ${action} watch status:`, error);
+      toast.error(`Failed to ${action} watch status.`);
     }
   };
 
@@ -393,7 +291,10 @@ export const WatchSmallCard = ({ data, refetch }) => {
           </span>
         </div>
 
-        {getDropdownMenu()}
+        <DropdownMenuActions
+          watchStatus={data.watchStatus}
+          handleAction={handleAction}
+        />
 
         <div className="text-xs font-thin px-2">{getWatchDate()}</div>
       </div>

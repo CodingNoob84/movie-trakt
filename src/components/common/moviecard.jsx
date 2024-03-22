@@ -9,7 +9,6 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
-import { useState } from "react";
 import {
   addToWatchList,
   removeFromWatchList,
@@ -18,167 +17,143 @@ import {
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 import { getGenresString } from "@/data/genres";
+import { Skeleton } from "../ui/skeleton";
+
+const DropdownMenuActions = ({ watchStatus, handleAction }) => {
+  const menuItems = {
+    list: [
+      {
+        text: "Remove from List",
+        action: () => handleAction("delete", "remove"),
+      },
+      {
+        text: "Mark as Watched",
+        action: () => handleAction("update", "watched"),
+      },
+      {
+        text: "Start Watching",
+        action: () => handleAction("update", "watching"),
+      },
+    ],
+    watching: [
+      { text: "Watch Later", action: () => handleAction("update", "list") },
+      {
+        text: "Mark as Watched",
+        action: () => handleAction("update", "watched"),
+      },
+      { text: "Skip / Delete", action: () => handleAction("delete", "delete") },
+    ],
+    watched: [
+      { text: "Watch Again", action: () => handleAction("update", "watching") },
+      { text: "Move to List", action: () => handleAction("update", "list") },
+      {
+        text: "Delete from Watched",
+        action: () => handleAction("delete", "delete"),
+      },
+    ],
+  };
+
+  const items = menuItems[watchStatus] || [
+    { text: "Add to Watchlist", action: () => handleAction("add", "list") },
+    { text: "Mark as Watched", action: () => handleAction("add", "watched") },
+    { text: "Start Watching", action: () => handleAction("add", "watching") },
+  ];
+
+  const ButtonContent = {
+    list: {
+      text: "In the WatchList",
+      color: "bg-blue-500 hover:bg-blue-600",
+    },
+    watching: {
+      text: "Watching now",
+      color: "bg-yellow-500 hover:bg-yellow-600",
+    },
+    watched: {
+      text: "Watched",
+      color: "bg-green-500 hover:bg-green-600",
+    },
+  };
+  const button = ButtonContent[watchStatus] || {
+    text: "Add to WatchList",
+    color: "bg-red-500 hover:bg-red-600",
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button size="sm" className={`w-full ${button.color}`}>
+          {button.text}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="bg-black text-white">
+        {items.map((item, index) => (
+          <DropdownMenuItem
+            key={index}
+            onClick={item.action}
+            className="hover:bg-gray-700"
+          >
+            {item.text}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
 
 export const MovieCard = ({ data, watchStatus, refetch }) => {
-  const [isUpdating, setIsUpdating] = useState(false);
   const { data: session } = useSession();
-  const handleWatchlist = async (watchStatus) => {
-    const newData = {
-      userId: session.user.id,
-      tmdbId: data.id,
-      mediaType: data.media_type,
-      title: data?.title || data?.name,
-      releaseDate: data?.release_date || data?.first_air_date,
-      tmdbRating: data?.vote_average,
-      watchStatus: watchStatus,
-      genres: getGenresString(data.genre_ids.join(","), data.media_type),
-      overview: data.overview,
-      posterImage: data.poster_path,
-      backdropImage: data.backdrop_path,
-    };
-    //console.log(newData);
-    const result = await addToWatchList(newData);
-    if (result) {
-      refetch();
-    }
-    //console.log(result);
-  };
+  const prepareData = (status) => ({
+    userId: session.user.id,
+    tmdbId: data.id,
+    mediaType: data.media_type,
+    title: data?.title || data?.name,
+    releaseDate: data?.release_date || data?.first_air_date,
+    tmdbRating: data?.vote_average,
+    watchStatus: status,
+    genres: getGenresString(data.genre_ids.join(","), data.media_type),
+    overview: data.overview,
+    posterImage: data.poster_path,
+    backdropImage: data.backdrop_path,
+  });
 
-  const handleRemoveFromWatchList = async () => {
-    setIsUpdating(true);
+  const handleAction = async (action, status) => {
     try {
-      await removeFromWatchList({ tmdbId: data.id, userId: session.user.id });
-      refetch();
+      let response;
+      if (action === "add") {
+        response = await addToWatchList(prepareData(status));
+      } else if (action === "update") {
+        response = await updateWatchStatus({
+          tmdbId: data.id,
+          userId: session.user.id,
+          watchStatus: status,
+        });
+      } else if (action === "delete") {
+        response = await removeFromWatchList({
+          tmdbId: data.id,
+          userId: session.user.id,
+        });
+      }
+
+      if (response?.msg === "limitreached") {
+        toast.warning("Maximum 5 movies can be marked as Watching");
+      } else if (action === "delete") {
+        // Show success message specifically for delete action
+        refetch();
+        toast.error("Removed from watchlist/watch history");
+      } else {
+        // General success message for other actions
+        refetch();
+        toast.success(`Movie marked as ${status}`);
+      }
     } catch (error) {
-      console.error("Failed to remove from watchlist:", error);
-    }
-    setIsUpdating(false);
-  };
-
-  const getDropdownMenu = () => {
-    //console.log(data.watchStatus);
-    switch (watchStatus) {
-      case "list":
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                size={"sm"}
-                className="bg-blue-500 hover:bg-blue-600 w-full"
-              >
-                In the Watchlist
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-black text-white">
-              <DropdownMenuItem onClick={() => handleRemoveFromWatchList()}>
-                Remove from List
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleWatchStatusChange("watched")}
-              >
-                Watched
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => handleWatchStatusChange("watching")}
-              >
-                Watch Now
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        );
-
-      case "watching":
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                size={"sm"}
-                className={`bg-green-500 hover:bg-green-600 w-full`}
-              >
-                Watching Now
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-black text-white">
-              <DropdownMenuItem
-                className="hover:bg-green-600"
-                onClick={() => handleWatchStatusChange("list")}
-              >
-                Watch Later
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="hover:bg-green-600"
-                onClick={() => handleWatchStatusChange("watched")}
-              >
-                Watched
-              </DropdownMenuItem>
-              <DropdownMenuItem className="hover:bg-green-600">
-                Skip / Delete
-              </DropdownMenuItem>
-              <DropdownMenuItem className="hover:bg-green-600">
-                Boring
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        );
-      case "watched":
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                size={"sm"}
-                className={`bg-red-500 hover:bg-red-600 w-full`}
-              >
-                Watched
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-black text-white">
-              <DropdownMenuItem
-                className="hover:bg-red-600"
-                onClick={() => handleWatchStatusChange("watched")}
-              >
-                Watch again
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="hover:bg-red-600"
-                onClick={() => handleWatchStatusChange("list")}
-              >
-                Watched to List
-              </DropdownMenuItem>
-              <DropdownMenuItem className="hover:bg-red-600">
-                Delete from Watched
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        );
-      default:
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                size={"sm"}
-                className="bg-red-500 hover:bg-red-600 w-full"
-              >
-                Add to Watchlist
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-black text-white">
-              <DropdownMenuItem onClick={() => handleWatchlist("list")}>
-                Add to Watchlist
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleWatchlist("watched")}>
-                Watched
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleWatchlist("watching")}>
-                Watch Now
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        );
+      console.error(`Failed to ${action} watch status:`, error);
+      toast.error(`Failed to ${action} watch status.`);
     }
   };
+
   return (
     <div className="flex flex-col w-[160px] gap-1 border rounded-xl shadow-xl">
-      <Link href="/detail" className="">
+      <Link href={`/movies/${data.id}`} className="">
         <div className="overflow-hidden rounded-xl w-full max-h-64">
           <img
             src={`${getTmDBImage(data?.poster_path || data?.posterImage)}`}
@@ -203,9 +178,40 @@ export const MovieCard = ({ data, watchStatus, refetch }) => {
           </span>
         </div>
 
-        {getDropdownMenu()}
+        <DropdownMenuActions
+          watchStatus={watchStatus}
+          handleAction={handleAction}
+        />
 
         <div className="text-xs px-2">friends are watching</div>
+      </div>
+    </div>
+  );
+};
+
+export const MovieCardLoader = () => {
+  return (
+    <div className="flex flex-col w-[160px] gap-1 border border-gray-400 rounded-xl shadow-xl">
+      <div className="overflow-hidden rounded-xl w-full h-48">
+        <Skeleton className="w-full h-full bg-slate-900" />
+      </div>
+
+      <div className="flex flex-col gap-2 p-1 lg:p-2">
+        <div className="truncate text-md font-bold">
+          <Skeleton className="w-full h-4 bg-slate-900" />
+        </div>
+        <div className="flex items-center gap-1 justify-between text-xs">
+          <Skeleton className="w-1/3 h-4 bg-slate-900" />
+          <Skeleton className="w-1/3 h-4 bg-slate-900" />
+          <Skeleton className="w-1/3 h-4 bg-slate-900" />
+        </div>
+        <div className="flex items-center gap-1 justify-between text-xs">
+          <Skeleton className="w-1/3 h-4 bg-slate-900" />
+          <Skeleton className="w-1/3 h-4 bg-slate-900" />
+          <Skeleton className="w-1/3 h-4 bg-slate-900" />
+        </div>
+
+        <Skeleton className="w-full h-7 bg-slate-900" />
       </div>
     </div>
   );

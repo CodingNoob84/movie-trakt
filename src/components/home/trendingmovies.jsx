@@ -14,7 +14,7 @@ export const TrendingMovies = () => {
   });
 
   const ids = data ? getIdsForSearch(data) : [];
-  console.log(data);
+  //console.log(data);
   const {
     data: watchdata,
     isLoading: isWatchStatusLoading,
@@ -28,11 +28,17 @@ export const TrendingMovies = () => {
       }),
     enabled: !!session?.user?.id && ids.length > 0,
   });
-  console.log(data);
-  console.log(watchdata);
+  //console.log(data);
+  //console.log(watchdata);
   return (
     <>
-      <MoviesRow title={"Trending Movies"} data={data} />
+      <MoviesRow
+        title={"Trending Movies"}
+        data={data}
+        watchdata={watchdata}
+        refetch={refetch}
+        isLoading={isLoading}
+      />
     </>
   );
 };

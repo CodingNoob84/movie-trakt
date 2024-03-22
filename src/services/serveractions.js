@@ -3,51 +3,159 @@
 import { db } from "@/lib/db";
 
 export const addToWatchList = async (data) => {
-  const result = await db.Watchlist.create({
-    data: data,
+  const { userId, tmdbId, watchStatus, ...movieDetails } = data;
+
+  // Ensure the movie exists in the Movie model
+  let movie = await db.movie.findFirst({
+    where: { tmdbId },
   });
-  return result;
+
+  // If the movie doesn't exist, insert it into the Movie model
+  if (!movie) {
+    movie = await db.movie.create({
+      data: {
+        tmdbId,
+        ...movieDetails,
+      },
+    });
+  }
+
+  // Check if the new watchStatus is "watching" and count current watching entries
+  if (watchStatus === "watching") {
+    const watchingCount = await db.watchlist.count({
+      where: {
+        userId: userId,
+        watchStatus: "watching",
+      },
+    });
+
+    // If the count is 5 or more, throw an error or return a specific message
+    if (watchingCount >= 5) {
+      return { msg: "limitreached" };
+    }
+  }
+
+  // Try to find an existing watchlist entry for the given user and movie
+  let watchlistEntry = await db.watchlist.findFirst({
+    where: {
+      AND: [{ userId: userId }, { tmdbId: tmdbId }],
+    },
+  });
+
+  // If the watchlist entry exists, update its watchStatus
+  if (watchlistEntry) {
+    watchlistEntry = await db.watchlist.update({
+      where: {
+        id: watchlistEntry.id,
+      },
+      data: {
+        watchStatus: watchStatus,
+      },
+    });
+  } else {
+    // If there's no existing entry, create a new one
+    watchlistEntry = await db.watchlist.create({
+      data: {
+        userId,
+        tmdbId,
+        watchStatus: watchStatus,
+      },
+    });
+  }
+
+  return watchlistEntry;
 };
 
 export const removeFromWatchList = async ({ tmdbId, userId }) => {
-  const result = await db.Watchlist.deleteMany({
+  const result = await db.watchlist.deleteMany({
     where: {
-      AND: [{ tmdbId: tmdbId }, { userId: userId }],
+      userId,
+      tmdbId,
     },
   });
   return result;
 };
 
 export const getWatchListByUserId = async ({ userId }) => {
-  const result = await db.Watchlist.findMany({
+  const result = await db.watchlist.findMany({
     where: {
       userId: userId,
       watchStatus: "list",
     },
+    include: {
+      movie: true,
+    },
+    orderBy: {
+      updatedAt: "desc", // Order by updatedAt in descending order
+    },
   });
-  return result;
+  return result.map(({ movie, ...rest }) => ({
+    ...rest,
+    mediaType: movie.mediaType,
+    title: movie.title,
+    releaseDate: movie.releaseDate,
+    tmdbRating: movie.tmdbRating,
+    genres: movie.genres,
+    overview: movie.overview,
+    posterImage: movie.posterImage,
+    backdropImage: movie.backdropImage,
+  }));
 };
 
 export const getWatchHistoryByUserId = async ({ userId }) => {
-  const watching = await db.Watchlist.findMany({
+  const Watchingresult = await db.Watchlist.findMany({
     where: {
       userId: userId,
       watchStatus: "watching",
     },
+    include: {
+      movie: true,
+    },
+    orderBy: {
+      updatedAt: "desc", // Order by updatedAt in descending order
+    },
   });
-  const watched = await db.Watchlist.findMany({
+  const watching = Watchingresult.map(({ movie, ...rest }) => ({
+    ...rest,
+    mediaType: movie.mediaType,
+    title: movie.title,
+    releaseDate: movie.releaseDate,
+    tmdbRating: movie.tmdbRating,
+    genres: movie.genres,
+    overview: movie.overview,
+    posterImage: movie.posterImage,
+    backdropImage: movie.backdropImage,
+  }));
+  const Watchedresult = await db.Watchlist.findMany({
     where: {
       userId: userId,
       watchStatus: "watched",
     },
+    include: {
+      movie: true,
+    },
+    orderBy: {
+      updatedAt: "desc", // Order by updatedAt in descending order
+    },
   });
+  const watched = Watchedresult.map(({ movie, ...rest }) => ({
+    ...rest,
+    mediaType: movie.mediaType,
+    title: movie.title,
+    releaseDate: movie.releaseDate,
+    tmdbRating: movie.tmdbRating,
+    genres: movie.genres,
+    overview: movie.overview,
+    posterImage: movie.posterImage,
+    backdropImage: movie.backdropImage,
+  }));
   return { watching, watched };
 };
 
 export const getWatchStatus = async ({ userId, tmdbIds }) => {
-  const matchingItems = await prisma.watchlist.findMany({
+  const matchingItems = await db.watchlist.findMany({
     where: {
-      userId: userId,
+      userId,
       tmdbId: {
         in: tmdbIds,
       },
@@ -61,7 +169,7 @@ export const getWatchStatus = async ({ userId, tmdbIds }) => {
 };
 
 export const updateWatchStatus = async ({ userId, tmdbId, watchStatus }) => {
-  console.log("status", watchStatus);
+  //console.log("status", tmdbId);
   if (watchStatus === "watching") {
     // Count how many movies are already set to "watching"
     const watchingCount = await db.Watchlist.count({
@@ -78,15 +186,21 @@ export const updateWatchStatus = async ({ userId, tmdbId, watchStatus }) => {
     }
   }
 
-  const result = await db.Watchlist.updateMany({
+  const result = await db.watchlist.update({
     where: {
-      AND: [{ userId: userId }, { tmdbId: tmdbId }],
+      userId_tmdbId: {
+        userId,
+        tmdbId,
+      },
     },
     data: {
-      watchStatus: watchStatus,
+      watchStatus,
     },
   });
-  console.log(result);
 
-  return { msg: "sucess", result };
+  return { msg: "success", result };
 };
+
+// export const getMovieDetails=async(tmdbId)=>{
+
+// }
