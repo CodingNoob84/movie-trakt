@@ -6,7 +6,7 @@ import { toggleFollow } from "@/services/serveractions";
 
 export const FollowingCard = ({ data, type, refetch }) => {
   const { data: session } = useSession();
-  console.log(data);
+  //console.log(data);
   const handleFollow = async () => {
     const result = await toggleFollow(session.user.id, data.id);
     refetch();

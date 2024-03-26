@@ -78,6 +78,7 @@ export const removeFromWatchList = async ({ tmdbId, userId }) => {
 };
 
 export const getWatchListByUserId = async ({ userId }) => {
+  console.log("userid", userId);
   const result = await db.watchlist.findMany({
     where: {
       userId: userId,

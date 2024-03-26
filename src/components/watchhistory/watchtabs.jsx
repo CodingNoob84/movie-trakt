@@ -19,7 +19,7 @@ export const WatchTabs = () => {
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["watchhistory", { userId: session.user.id }],
-    queryFn: () => getWatchHistoryByUserId(session.user.id),
+    queryFn: () => getWatchHistoryByUserId({ userId: session.user.id }),
   });
 
   const renderWatchCards = (items) => {

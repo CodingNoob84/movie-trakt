@@ -14,14 +14,14 @@ export const FollowingTab = () => {
   const { data: session } = useSession();
   const [tab, setTab] = useState("global");
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ["global"],
+    queryKey: ["following"],
     queryFn: () => getAllUsersWithFollowingStatus(session?.user?.id),
   });
   if (isLoading) {
     return <>Loading...</>;
   }
   //const allusers = await getAllUsers();
-  console.log("following", data);
+  //console.log("following", data);
   return (
     <div className="flex flex-col gap-4 w-full">
       <div className="flex w-full">Search</div>

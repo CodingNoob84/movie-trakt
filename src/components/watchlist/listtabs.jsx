@@ -41,7 +41,7 @@ export const ListTabs = () => {
   const [tab, setTab] = useState("movie");
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["watchlist", { userId: session.user.id }],
-    queryFn: () => getWatchListByUserId(session.user.id),
+    queryFn: () => getWatchListByUserId({ userId: session.user.id }),
   });
   //console.log(data);
   const filteredData = getMovieTvData(data || [], tab);
