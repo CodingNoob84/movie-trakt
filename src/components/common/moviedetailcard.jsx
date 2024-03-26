@@ -155,7 +155,7 @@ export const MovieDetailCard = ({ data, watchStatus, refetch }) => {
         <img
           alt={data?.title}
           height="500"
-          className="w-[400px] lg:w-full h-[300px] select-none object-top"
+          className="w-full h-[400px] select-none object-top"
           src={`${getTmDBImage(data?.backdropImage || data?.backdrop_path)}`}
           style={{ color: "transparent", objectFit: "cover" }}
         />

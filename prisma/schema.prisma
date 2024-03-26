@@ -35,6 +35,9 @@ model User {
   updatedAt     DateTime    @updatedAt
   accounts      Account[]
   watchlists    Watchlist[]
+
+  following     Following[] @relation("UserFollows")
+  followers     Following[] @relation("UserFollowedBy")
 }
 
 model Movie {
@@ -63,4 +66,14 @@ model Watchlist {
   user        User     @relation(fields: [userId], references: [id])
 
   @@unique([userId, tmdbId])
+}
+
+model Following {
+  id          String   @id @default(cuid())
+  followerId  String   // ID of the user who is following
+  followingId String   // ID of the user being followed
+  follower    User     @relation("UserFollows", fields: [followerId], references: [id])
+  following   User     @relation("UserFollowedBy", fields: [followingId], references: [id])
+
+  @@unique([followerId, followingId]) // Ensures unique combinations of follower and following
 }

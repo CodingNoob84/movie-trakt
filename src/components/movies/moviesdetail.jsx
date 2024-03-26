@@ -31,7 +31,7 @@ export const MoviesDetail = ({ tmdbId }) => {
   const matchingItem = watchdata?.find((item) => item.tmdbId === tmdbId);
   const watchStatus = matchingItem ? matchingItem.watchStatus : "";
   return (
-    <div className="flex flex-col gap-6 w-screen">
+    <div className="flex flex-col w-full">
       {!isLoading && (
         <MovieDetailCard
           data={data}

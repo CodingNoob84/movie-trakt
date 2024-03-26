@@ -220,3 +220,90 @@ export const getMovieDetails = async ({ tmdbId, userId }) => {
   });
   return { ...movie, ...watchdata };
 };
+
+export const getAllUsers = async () => {
+  const AllUsers = db.User.findMany();
+  return AllUsers;
+};
+
+export const getAllUsersWithFollowingStatus = async (currentUserId) => {
+  // Fetch all users except the current user
+  const users = await prisma.user.findMany({
+    where: {
+      NOT: {
+        id: currentUserId, // Exclude the current user from the result set
+      },
+    },
+    include: {
+      followers: {
+        select: { followerId: true },
+      },
+    },
+  });
+
+  // Initialize arrays to hold following and nonFollowing users
+  let following = [];
+  let nonFollowing = [];
+
+  // Iterate over users to categorize them as following or nonFollowing
+  users.forEach((user) => {
+    const isFollowing = user.followers.some(
+      (follower) => follower.followerId === currentUserId
+    );
+    const userWithoutFollowers = { ...user };
+    delete userWithoutFollowers.followers; // Optionally remove the followers field
+
+    if (isFollowing) {
+      following.push(userWithoutFollowers);
+    } else {
+      nonFollowing.push(userWithoutFollowers);
+    }
+  });
+
+  return { following, nonFollowing };
+};
+
+export const toggleFollow = async (followerId, followingId) => {
+  try {
+    // Check if the follow relationship already exists
+    const existingFollow = await prisma.following.findUnique({
+      where: {
+        followerId_followingId: {
+          followerId: followerId,
+          followingId: followingId,
+        },
+      },
+    });
+
+    if (existingFollow) {
+      // If it exists, delete the follow relationship
+      await prisma.following.delete({
+        where: {
+          followerId_followingId: {
+            followerId: followerId,
+            followingId: followingId,
+          },
+        },
+      });
+      return {
+        status: "success",
+        message: "Successfully unfollowed the user.",
+      };
+    } else {
+      // If it does not exist, create the follow relationship
+      await prisma.following.create({
+        data: {
+          followerId: followerId,
+          followingId: followingId,
+        },
+      });
+      return { status: "success", message: "Successfully followed the user." };
+    }
+  } catch (error) {
+    console.error("Toggle follow failed:", error);
+    return {
+      status: "failure",
+      message: "Failed to toggle the follow status due to an unexpected error.",
+    };
+  }
+};

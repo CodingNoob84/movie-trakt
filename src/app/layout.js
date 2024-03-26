@@ -16,13 +16,13 @@ export const metadata = {
 export default async function RootLayout({ children }) {
   const session = await auth();
   return (
-    <SessionProvider session={session}>
-      <html lang="en" className="black">
-        <body className={`${inter.className} bg-black text-white`}>
+    <html lang="en" className="black" suppressHydrationWarning={true}>
+      <body className={`${inter.className} bg-black text-white`}>
+        <SessionProvider session={session}>
           <ReactQueryProvider>{children}</ReactQueryProvider>
           <Toaster richColors />
-        </body>
-      </html>
-    </SessionProvider>
+        </SessionProvider>
+      </body>
+    </html>
   );
 }
