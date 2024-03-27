@@ -32,3 +32,11 @@ export const getIds = (data) => {
 export const convertGenresString = (array) => {
   return array;
 };
+
+export function getInitials(name) {
+  const initials = name
+    .split(" ")
+    .map((part) => part[0].toUpperCase())
+    .join("");
+  return initials;
+}

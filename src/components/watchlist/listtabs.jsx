@@ -16,7 +16,7 @@ function getMovieTvData(data, mediaType) {
 }
 
 const ContentDisplay = ({ isLoading, items, view, refetch }) => (
-  <div className="flex flex-row justify-evenly gap-4 flex-wrap">
+  <div className="flex flex-row gap-4 flex-wrap">
     {isLoading
       ? Array.from({ length: 5 }, (_, i) =>
           view === "small" ? (

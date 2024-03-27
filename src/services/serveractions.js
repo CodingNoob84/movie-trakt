@@ -227,6 +227,14 @@ export const getMovieDetails = async ({ tmdbId, userId }) => {
   return { ...movie, ...watchdata };
 };
 
+export const getUser = async ({ userId }) => {
+  return db.user.findFirst({
+    where: {
+      id: userId,
+    },
+  });
+};
+
 export const getAllUsers = async () => {
   const AllUsers = db.User.findMany();
   return AllUsers;

@@ -11,15 +11,14 @@ import {
 } from "../common/watchcard";
 import useViewStore from "@/store/viewstore";
 
-export const WatchTabs = () => {
-  const { data: session } = useSession();
+export const UserWatchTabs = ({ userId }) => {
   const [tab, setTab] = useState("watching");
   // Using a hypothetical useContext hook to retrieve the current view state
   const { view } = useViewStore(); // Assume this context provides the current view ("small" or "big")
 
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ["watchhistory", { userId: session.user.id }],
-    queryFn: () => getWatchHistoryByUserId({ userId: session.user.id }),
+    queryKey: ["watchhistory", { userId: userId }],
+    queryFn: () => getWatchHistoryByUserId({ userId: userId }),
   });
 
   const renderWatchCards = (items) => {
@@ -63,7 +62,7 @@ export const WatchTabs = () => {
             {renderWatchCards(data?.watching || [])}
           </div>
         ) : (
-          <div className="flex flex-row gap-4 flex-wrap">
+          <div className="flex flex-row  gap-4 flex-wrap">
             {renderWatchCards(data?.watched || [])}
           </div>
         )}

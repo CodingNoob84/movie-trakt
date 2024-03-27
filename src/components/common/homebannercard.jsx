@@ -100,7 +100,7 @@ const DropdownMenuActions = ({ watchStatus, handleAction }) => {
 };
 
 export const HomeBannerCard = ({ data, watchStatus, refetch, autoplay }) => {
-  console.log(data);
+  //console.log(data);
   const { data: session } = useSession();
   const prepareData = (status) => ({
     userId: session.user.id,

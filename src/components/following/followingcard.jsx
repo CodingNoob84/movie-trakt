@@ -5,14 +5,8 @@ import { Button } from "../ui/button";
 import { toggleFollow } from "@/services/serveractions";
 import { useState } from "react";
 import { Skeleton } from "../ui/skeleton";
-
-function getInitials(name) {
-  const initials = name
-    .split(" ")
-    .map((part) => part[0].toUpperCase())
-    .join("");
-  return initials;
-}
+import Link from "next/link";
+import { getInitials } from "@/lib/utils";
 
 export const FollowingCard = ({ data, type, refetch }) => {
   const [loading, setLoading] = useState(false);
@@ -39,7 +33,10 @@ export const FollowingCard = ({ data, type, refetch }) => {
           </div>
         </div>
         <div className="flex flex-row gap-4 items-center justify-between">
-          <Button>Watch History</Button>
+          <Button asChild>
+            <Link href={`/user/${data.id}`}>Watch History</Link>
+          </Button>
+
           {type === "following" ? (
             <Button className={`text-red-500`} onClick={() => handleFollow()}>
               {loading ? "Loading..." : "Un-Follow"}

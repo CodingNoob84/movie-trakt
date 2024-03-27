@@ -14,7 +14,7 @@ export const TvShows = () => {
   });
 
   const ids = data ? getIds(data) : [];
-  console.log(data);
+  //console.log(data);
   const {
     data: watchdata,
     isLoading: isWatchStatusLoading,
@@ -41,7 +41,7 @@ export const TvShows = () => {
     );
   }
   //console.log(data);
-  console.log(watchdata);
+  //console.log(watchdata);
   return (
     <div className="flex flex-row flex-wrap justify-evenly gap-4">
       {data?.map((movie, i) => {
