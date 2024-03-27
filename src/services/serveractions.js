@@ -229,7 +229,7 @@ export const getAllUsers = async () => {
 
 export const getAllUsersWithFollowingStatus = async (currentUserId) => {
   // Fetch all users except the current user
-  const users = await prisma.user.findMany({
+  const users = await db.user.findMany({
     where: {
       NOT: {
         id: currentUserId, // Exclude the current user from the result set
