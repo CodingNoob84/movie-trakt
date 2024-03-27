@@ -104,16 +104,8 @@ export const MovieCard = ({ data, watchStatus, refetch }) => {
   const { data: session } = useSession();
   const prepareData = (status) => ({
     userId: session.user.id,
-    tmdbId: data.id,
-    mediaType: data.media_type,
-    title: data?.title || data?.name,
-    releaseDate: data?.release_date || data?.first_air_date,
-    tmdbRating: data?.vote_average,
     watchStatus: status,
-    genres: getGenresString(data.genre_ids.join(","), data.media_type),
-    overview: data.overview,
-    posterImage: data.poster_path,
-    backdropImage: data.backdrop_path,
+    ...data,
   });
 
   const handleAction = async (action, status) => {
@@ -123,13 +115,13 @@ export const MovieCard = ({ data, watchStatus, refetch }) => {
         response = await addToWatchList(prepareData(status));
       } else if (action === "update") {
         response = await updateWatchStatus({
-          tmdbId: data.id,
+          tmdbId: data.tmdbId,
           userId: session.user.id,
           watchStatus: status,
         });
       } else if (action === "delete") {
         response = await removeFromWatchList({
-          tmdbId: data.id,
+          tmdbId: data.tmdbId,
           userId: session.user.id,
         });
       }

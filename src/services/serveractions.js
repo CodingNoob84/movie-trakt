@@ -1,7 +1,12 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { getMovieDetailfromTmdb } from "./tmdb";
+import {
+  getMovieDetailfromTmdb,
+  getTrendingMovies,
+  getTrendingTvshows,
+} from "./tmdb";
+import { getGenresString } from "@/data/genres";
 
 export const addToWatchList = async (data) => {
   const { userId, tmdbId, watchStatus, ...movieDetails } = data;
@@ -307,4 +312,148 @@ export const toggleFollow = async (followerId, followingId) => {
       message: "Failed to toggle the follow status due to an unexpected error.",
     };
   }
+};
+
+export const getTrendingToDb = async (type) => {
+  let results = []; // Declare results outside the if-else blocks
+
+  if (type === "movie") {
+    const response = await getTrendingMovies();
+    results = response.results;
+  } else {
+    const response = await getTrendingTvshows();
+    results = response.results;
+  }
+
+  for (const movie of results.filter((movie) => movie.media_type === type)) {
+    // Ensure media type is "movie"
+    await db.trending.upsert({
+      where: {
+        tmdbId: movie.id, // Use tmdbId as the unique identifier
+      },
+      update: {
+        // Fields to update if the movie exists
+        mediaType: movie.media_type,
+        title: movie.title || movie.name,
+        releaseDate: movie.release_date || movie.first_air_date,
+        tmdbRating: movie.vote_average,
+        genres: getGenresString(movie.genre_ids.join(","), movie.media_type),
+        overview: movie.overview,
+        posterImage: movie.poster_path,
+        backdropImage: movie.backdrop_path,
+      },
+      create: {
+        // Data to insert if the movie doesn't exist
+        tmdbId: movie.id,
+        mediaType: movie.media_type,
+        title: movie.title || movie.name,
+        releaseDate: movie.release_date || movie.first_air_date,
+        tmdbRating: movie.vote_average,
+        genres: getGenresString(movie.genre_ids.join(","), movie.media_type),
+        overview: movie.overview,
+        posterImage: movie.poster_path,
+        backdropImage: movie.backdrop_path,
+      },
+    });
+    //console.log(`Processed: ${movie.title}`);
+  }
+
+  return { success: true };
+};
+
+export const getCountAndLastUpdatedTime = async (type) => {
+  try {
+    // Get the count of movies
+    const moviesCount = await db.trending.count({
+      where: {
+        mediaType: type,
+      },
+    });
+
+    // Get the most recent updatedAt timestamp for movies
+    const lastUpdatedMovie = await db.trending.findFirst({
+      where: {
+        mediaType: type,
+      },
+      orderBy: {
+        updatedAt: "desc",
+      },
+      select: {
+        updatedAt: true,
+      },
+    });
+
+    // If there's no movie data available, handle it accordingly
+    if (!lastUpdatedMovie) {
+      return { success: false, message: "No movie data available." };
+    }
+
+    return {
+      success: true,
+      count: moviesCount,
+      lastUpdated: lastUpdatedMovie.updatedAt,
+    };
+  } catch (error) {
+    console.error("Error fetching movie count and last updated time:", error);
+    return {
+      success: false,
+      message: "Failed to fetch movie count and last updated time.",
+    };
+  }
+};
+
+export const getTrendingDB = async (type) => {
+  //console.log("type", type);
+  const result = await db.trending.findMany({
+    where: {
+      mediaType: type,
+    },
+    select: {
+      id: true,
+      tmdbId: true,
+      mediaType: true,
+      title: true,
+      releaseDate: true,
+      tmdbRating: true,
+      genres: true,
+      overview: true,
+      posterImage: true,
+      backdropImage: true,
+      // Ensure all other fields you want to include are listed here
+      // Notice the absence of createdAt and updatedAt, which means they will not be included
+    },
+  });
+
+  //console.log(result);
+  return result;
+};
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+  }
+  return array;
+}
+export const getTrendingAllDB = async () => {
+  //console.log("type", type);
+  const result = await db.trending.findMany({
+    select: {
+      id: true,
+      tmdbId: true,
+      mediaType: true,
+      title: true,
+      releaseDate: true,
+      tmdbRating: true,
+      genres: true,
+      overview: true,
+      posterImage: true,
+      backdropImage: true,
+      // Ensure all other fields you want to include are listed here
+      // Notice the absence of createdAt and updatedAt, which means they will not be included
+    },
+  });
+
+  //console.log(result);
+  return shuffle(result);
 };

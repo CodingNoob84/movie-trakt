@@ -64,6 +64,11 @@ export const SIDEBAR_ITEMS = [
         link: "/watchhistory",
         icon: <WatchHistory />,
       },
+      {
+        label: "Admin",
+        link: "/admin",
+        icon: <WatchHistory />,
+      },
     ],
   },
 ];

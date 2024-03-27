@@ -9,7 +9,7 @@ import { useSession } from "next-auth/react";
 import { addToWatchList, removeFromWatchList } from "@/services/serveractions";
 
 export const SearchCard = ({ data, watchStatus, refetch }) => {
-  console.log(watchStatus);
+  console.log(data);
   const { data: session } = useSession();
   if (data.media_type === "person") {
     return;

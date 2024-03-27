@@ -1,3 +1,5 @@
+import { getGenresString } from "@/data/genres";
+
 const APIKEY = process.env.NEXT_PUBLIC_TMDB_APIKEY;
 const options = {
   method: "GET",
@@ -25,7 +27,26 @@ const BaseTmdbUrl = process.env.NEXT_PUBLIC_TMDB_APIURL;
 export const searchwithQuery = async (query) => {
   if (!query) return;
   const url = `${BaseTmdbUrl}/3/search/multi?query=${query}&include_adult=false&language=en-US&page=1`;
-  return await fetchData(url);
+  const data = await fetchData(url);
+  //console.log(data);
+  const result = data?.results
+    .filter(
+      (movie) => movie.media_type === "movie" || movie.media_type === "tv"
+    ) // This line is optional if you're sure all items are either movies or tv shows
+    .map((movie) => ({
+      tmdbId: movie.id,
+      mediaType: movie.media_type,
+      title: movie.title || movie.name, // Use 'title' for movies and 'name' for TV shows
+      releaseDate: movie.release_date || movie.first_air_date, // Use 'release_date' for movies and 'first_air_date' for TV shows
+      tmdbRating: movie.vote_average,
+      genres: getGenresString(movie.genre_ids.join(","), movie.media_type),
+      overview: movie.overview,
+      posterImage: movie.poster_path,
+      backdropImage: movie.backdrop_path,
+    }));
+
+  //console.log("result", result);
+  return result;
 };
 
 export const getTrending = async () => {

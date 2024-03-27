@@ -48,9 +48,9 @@ export const MoviesRow = ({ title, data, watchdata, refetch, isLoading }) => {
         ) : (
           <Carousel opts={options} setApi={setApi}>
             <CarouselContent className="mt-4 flex flex-row gap-0.5">
-              {data?.results.map((movie, i) => {
+              {data?.map((movie, i) => {
                 const matchingWatchData = watchdata?.find(
-                  (watchItem) => watchItem.tmdbId === movie.id
+                  (watchItem) => watchItem.tmdbId === movie.tmdbId
                 );
                 return (
                   <CarouselItem key={i} className="basis-1/2 lg:basis-1/5">

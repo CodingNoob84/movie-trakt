@@ -25,6 +25,10 @@ export const getIdsForSearch = (data) => {
     .map((item) => item.id);
 };
 
+export const getIds = (data) => {
+  return data.map((item) => item.tmdbId);
+};
+
 export const convertGenresString = (array) => {
   return array;
 };

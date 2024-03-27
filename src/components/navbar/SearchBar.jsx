@@ -10,7 +10,7 @@ export const SearchBar = () => {
 
   // Clear the input field when the route changes
   useEffect(() => {
-    if (router.pathname !== "/search") {
+    if (pathname !== "/search") {
       setSearchValue(""); // Clear the search input
     }
   }, [pathname]);

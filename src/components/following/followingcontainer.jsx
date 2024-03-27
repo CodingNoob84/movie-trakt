@@ -1,4 +1,4 @@
-import { FollowingCard } from "./followingcard";
+import { FollowingCard, FollowingCardLoader } from "./followingcard";
 
 export const FollowingContainer = ({ data, type, refetch }) => {
   return (

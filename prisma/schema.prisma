@@ -77,3 +77,18 @@ model Following {
 
   @@unique([followerId, followingId]) // Ensures unique combinations of follower and following
 }
+
+model Trending {
+  id            String      @id @default(cuid())
+  tmdbId        Int         @unique
+  mediaType     String
+  title         String
+  releaseDate   String?
+  tmdbRating    Float?
+  genres        String?
+  overview      String?
+  posterImage   String?
+  backdropImage String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}

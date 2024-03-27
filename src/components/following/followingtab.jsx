@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { FollowingContainer } from "./followingcontainer";
 import { useSession } from "next-auth/react";
+import { FollowingCardLoader } from "./followingcard";
 
 export const FollowingTab = () => {
   const { data: session } = useSession();
@@ -12,9 +13,7 @@ export const FollowingTab = () => {
     queryKey: ["following"],
     queryFn: () => getAllUsersWithFollowingStatus(session?.user?.id),
   });
-  if (isLoading) {
-    return <div className="flex justify-center">Loading...</div>;
-  }
+
   //const allusers = await getAllUsers();
   console.log("following", data);
   return (
@@ -33,6 +32,13 @@ export const FollowingTab = () => {
           </div>
         ))}
       </div>
+      {isLoading && (
+        <div className="flex flex-col w-full">
+          {Array.from({ length: 5 }, (_, i) => (
+            <FollowingCardLoader key={i} />
+          ))}
+        </div>
+      )}
       {tab === "following" ? (
         <FollowingContainer
           data={data?.following || []}

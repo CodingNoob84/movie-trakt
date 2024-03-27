@@ -149,6 +149,7 @@ const genres = {
 //return name with comma
 export const getGenres = (str, type) => {
   const ids = str.split(",").map((id) => parseInt(id));
+  //console.log("ids", ids);
   const genreList = type === "movie" ? genres.moviegenres : genres.tvgenres;
   const genreNames = ids
     .map((id) => {
@@ -156,11 +157,13 @@ export const getGenres = (str, type) => {
       return genre ? genre.name : null;
     })
     .filter((name) => name !== null);
+  //console.log("genresname", genreNames);
   return genreNames;
 };
 
 export const getGenresString = (str, type) => {
   const ids = str.split(",").map((id) => parseInt(id));
+  //console.log("ids", ids);
   const genreList = type === "movie" ? genres.moviegenres : genres.tvgenres;
   const genreNames = ids
     .map((id) => {
@@ -168,5 +171,6 @@ export const getGenresString = (str, type) => {
       return genre ? genre.name : null;
     })
     .filter((name) => name !== null);
+  //console.log("genresname", genreNames);
   return genreNames.join(",");
 };
