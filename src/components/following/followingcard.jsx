@@ -4,6 +4,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { toggleFollow } from "@/services/serveractions";
 
+function getInitials(name) {
+  const initials = name
+    .split(" ")
+    .map((part) => part[0].toUpperCase())
+    .join("");
+  return initials;
+}
+
 export const FollowingCard = ({ data, type, refetch }) => {
   const { data: session } = useSession();
   //console.log(data);
@@ -17,8 +25,8 @@ export const FollowingCard = ({ data, type, refetch }) => {
       <div className="flex flex-col lg:flex-row lg:justify-between gap-4">
         <div className="flex flex-row gap-2">
           <Avatar className="w-24 h-24">
-            <AvatarImage src={data.image} />
-            <AvatarFallback>DJ</AvatarFallback>
+            <AvatarImage src={data.image} alt={data.name} />
+            <AvatarFallback>{getInitials(data.name)}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
             <div>{data.name}</div>

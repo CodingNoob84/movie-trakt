@@ -1,11 +1,6 @@
 "use client";
-import {
-  getAllUsers,
-  getAllUsersWithFollowingStatus,
-} from "@/services/serveractions";
-import { useAmp } from "next/amp";
+import { getAllUsersWithFollowingStatus } from "@/services/serveractions";
 import { useState } from "react";
-import { FollowingCard } from "./followingcard";
 import { useQuery } from "@tanstack/react-query";
 import { FollowingContainer } from "./followingcontainer";
 import { useSession } from "next-auth/react";
@@ -18,10 +13,10 @@ export const FollowingTab = () => {
     queryFn: () => getAllUsersWithFollowingStatus(session?.user?.id),
   });
   if (isLoading) {
-    return <>Loading...</>;
+    return <div className="flex justify-center">Loading...</div>;
   }
   //const allusers = await getAllUsers();
-  //console.log("following", data);
+  console.log("following", data);
   return (
     <div className="flex flex-col gap-4 w-full">
       <div className="flex w-full">Search</div>
@@ -40,13 +35,13 @@ export const FollowingTab = () => {
       </div>
       {tab === "following" ? (
         <FollowingContainer
-          data={data.following}
+          data={data?.following || []}
           type={"following"}
           refetch={refetch}
         />
       ) : (
         <FollowingContainer
-          data={data.nonFollowing}
+          data={data?.nonFollowing || []}
           type={"global"}
           refetch={refetch}
         />
