@@ -267,7 +267,7 @@ export const getAllUsersWithFollowingStatus = async (currentUserId) => {
 export const toggleFollow = async (followerId, followingId) => {
   try {
     // Check if the follow relationship already exists
-    const existingFollow = await prisma.following.findUnique({
+    const existingFollow = await db.following.findUnique({
       where: {
         followerId_followingId: {
           followerId: followerId,
@@ -278,7 +278,7 @@ export const toggleFollow = async (followerId, followingId) => {
 
     if (existingFollow) {
       // If it exists, delete the follow relationship
-      await prisma.following.delete({
+      await db.following.delete({
         where: {
           followerId_followingId: {
             followerId: followerId,
@@ -292,7 +292,7 @@ export const toggleFollow = async (followerId, followingId) => {
       };
     } else {
       // If it does not exist, create the follow relationship
-      await prisma.following.create({
+      await db.following.create({
         data: {
           followerId: followerId,
           followingId: followingId,
