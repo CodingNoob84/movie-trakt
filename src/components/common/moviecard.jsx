@@ -145,7 +145,7 @@ export const MovieCard = ({ data, watchStatus, refetch }) => {
 
   return (
     <div className="flex flex-col w-[160px] gap-1 border rounded-xl shadow-xl">
-      <Link href={`/movies/${data.id}`} className="">
+      <Link href={`/movies/${data.tmdbId}`} className="">
         <div className="overflow-hidden rounded-xl w-full max-h-64">
           <img
             src={`${getTmDBImage(data?.poster_path || data?.posterImage)}`}

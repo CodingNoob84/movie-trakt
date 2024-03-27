@@ -1,5 +1,6 @@
 "use client";
 import {
+  AdminIcon,
   ComingSoonIcon,
   FriendsIcon,
   HomeIcon,
@@ -67,7 +68,7 @@ export const SIDEBAR_ITEMS = [
       {
         label: "Admin",
         link: "/admin",
-        icon: <WatchHistory />,
+        icon: <AdminIcon />,
       },
     ],
   },

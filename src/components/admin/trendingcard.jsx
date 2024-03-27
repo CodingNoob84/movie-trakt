@@ -7,6 +7,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Button } from "../ui/button";
+import { Skeleton } from "../ui/skeleton";
 
 export const TrendingUpdateCard = ({ type }) => {
   const { data, isLoading, refetch } = useQuery({
@@ -19,8 +20,16 @@ export const TrendingUpdateCard = ({ type }) => {
     console.log(result);
     refetch();
   };
+  if (isLoading) {
+    return (
+      <div className="w-full flex flex-row border rounded-md p-5 justify-center items-center border-red-600 gap-5">
+        <Skeleton className={"w-full h-8 bg-slate-600"} />
+        <Skeleton className={"w-full h-8 bg-slate-600"} />
+      </div>
+    );
+  }
   return (
-    <div className="flex flex-row border rounded-md p-5 justify-center items-center border-red-600 gap-5">
+    <div className="w-full flex flex-row border rounded-md p-5 justify-center items-center border-red-600 gap-5">
       <div>
         last updated at{" "}
         {!isLoading && format(data?.lastUpdated, "EEE, d MMM p")}{" "}

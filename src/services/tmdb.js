@@ -69,7 +69,29 @@ export const getMovieDetailfromTmdb = async (tmdbId) => {
   return await fetchData(url);
 };
 
+export const getTvDetailfromTmdb = async (tmdbId) => {
+  const url = `${BaseTmdbUrl}/3/tv/${tmdbId}?language=en-US`;
+  return await fetchData(url);
+};
+
 export const getMovieRecommendations = async (tmdbId) => {
   const url = `${BaseTmdbUrl}/3/movie/${tmdbId}/recommendations?language=en-US&page=1`;
+  const data = await fetchData(url);
+  const result = data?.results.map((movie) => ({
+    tmdbId: movie.id,
+    mediaType: movie.media_type,
+    title: movie.title || movie.name, // Use 'title' for movies and 'name' for TV shows
+    releaseDate: movie.release_date || movie.first_air_date, // Use 'release_date' for movies and 'first_air_date' for TV shows
+    tmdbRating: movie.vote_average,
+    genres: getGenresString(movie.genre_ids.join(","), movie.media_type),
+    overview: movie.overview,
+    posterImage: movie.poster_path,
+    backdropImage: movie.backdrop_path,
+  }));
+  return result;
+};
+
+export const getUpcoming = async () => {
+  const url = `${BaseTmdbUrl}/3/movie/upcoming?&region=IN`;
   return await fetchData(url);
 };

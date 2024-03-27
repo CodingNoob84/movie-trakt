@@ -1,5 +1,5 @@
 "use client";
-import { getIdsForSearch } from "@/lib/utils";
+import { getIds, getIdsForSearch } from "@/lib/utils";
 import { getWatchStatus } from "@/services/serveractions";
 import { getMovieRecommendations } from "@/services/tmdb";
 import { useQuery } from "@tanstack/react-query";
@@ -13,7 +13,7 @@ export const Recommendations = ({ tmdbId }) => {
     queryFn: () => getMovieRecommendations(tmdbId),
   });
 
-  const ids = data ? getIdsForSearch(data) : [];
+  const ids = data ? getIds(data) : [];
   //console.log(data);
   const {
     data: watchdata,
