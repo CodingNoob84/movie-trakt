@@ -34,12 +34,12 @@ export const MoviesRow = ({ title, data, watchdata, refetch, isLoading }) => {
         </div>
         {isLoading ? (
           <>
-            <div className="mt-4 lg:hidden flex flex-row justify-evenly">
+            <div className="mt-4 lg:hidden flex flex-row">
               {Array.from({ length: 2 }, (_, i) => (
-                <WatchSmallCardLoader key={i} />
+                <WatchSmallCardLoader key={i} className="basis-auto" />
               ))}
             </div>
-            <div className="hidden mt-4 lg:flex flex-row justify-evenly">
+            <div className="hidden mt-4 lg:flex flex-row">
               {Array.from({ length: 5 }, (_, i) => (
                 <WatchSmallCardLoader key={i} />
               ))}
@@ -53,7 +53,7 @@ export const MoviesRow = ({ title, data, watchdata, refetch, isLoading }) => {
                   (watchItem) => watchItem.tmdbId === movie.tmdbId
                 );
                 return (
-                  <CarouselItem key={i} className="basis-1/2 lg:basis-1/5">
+                  <CarouselItem key={i} className="basis-auto">
                     <MovieCard
                       data={movie}
                       watchStatus={
