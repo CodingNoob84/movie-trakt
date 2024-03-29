@@ -1,22 +1,12 @@
 //"use client";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GoogleButton } from "./_components/googlebutton";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 
 export default async function LoginPage() {
   const session = await auth();
-  //console.log("loginsession", session);
   const isLoggedIn = !!session;
-  //console.log("login", isLoggedIn);
   if (isLoggedIn) {
     redirect("/");
   }
@@ -26,8 +16,11 @@ export default async function LoginPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-center">Login</CardTitle>
-          <div>Logo</div>
-          {/* <CardDescription>Card Description</CardDescription> */}
+          <div className="flex justify-center items-center ">
+            <div className="w-24 h-24">
+              <img src="/icons/icon-512x512.png" alt="Logo" />
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="w-full flex flex-col gap-5">
           <p className="text-sm">Please login with your google account</p>

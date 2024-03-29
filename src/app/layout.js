@@ -54,6 +54,8 @@ export const viewport = {
   themeColor: "#FFFFFF",
 };
 
+<link rel="preconnect" href="https://image.tmdb.org" />;
+
 export default async function RootLayout({ children }) {
   const session = await auth();
   return (
