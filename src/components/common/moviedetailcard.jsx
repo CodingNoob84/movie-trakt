@@ -16,6 +16,7 @@ import {
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 import { Badge } from "../ui/badge";
+import { GiveRating } from "./giverating";
 
 const DropdownMenuActions = ({ watchStatus, handleAction }) => {
   const menuItems = {
@@ -210,7 +211,7 @@ export const MovieDetailCard = ({ data, watchStatus, refetch }) => {
                   <span className="text-_welcometext_lightblue text-xs">
                     {Number(data?.vote_average).toFixed(1)}
                   </span>
-                  <RatingIcon />
+                  <RatingIcon className={"text-yellow-500"} />
                 </div>
               </div>
             </div>

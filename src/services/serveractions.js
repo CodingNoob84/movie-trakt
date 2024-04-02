@@ -176,9 +176,8 @@ export const getWatchStatus = async ({ userId, tmdbIds }) => {
 };
 
 export const updateWatchStatus = async ({ userId, tmdbId, watchStatus }) => {
-  //console.log("status", tmdbId);
+  // Count how many movies are already set to "watching"
   if (watchStatus === "watching") {
-    // Count how many movies are already set to "watching"
     const watchingCount = await db.Watchlist.count({
       where: {
         userId: userId,
@@ -186,13 +185,24 @@ export const updateWatchStatus = async ({ userId, tmdbId, watchStatus }) => {
       },
     });
 
-    // If there are already 5 movies set to "watching", prevent the update or handle accordingly
+    // If there are already 5 movies set to "watching", prevent the update
     if (watchingCount >= 5) {
-      //console.log("User has reached the limit of 5 movies set to watching.");
-      return { msg: "limitreached" }; // Or throw an error or handle this case as needed
+      // Handle the case where the user already has 5 movies set to watching
+      return { msg: "limitreached" };
     }
   }
 
+  // Prepare the data for updating
+  let updateData = {
+    watchStatus,
+  };
+
+  // Only update watchDateTime if watchStatus is "watched"
+  if (watchStatus === "watched" || watchStatus === "watching") {
+    updateData.watchDateTime = new Date();
+  }
+
+  // Perform the update
   const result = await db.watchlist.update({
     where: {
       userId_tmdbId: {
@@ -200,9 +210,7 @@ export const updateWatchStatus = async ({ userId, tmdbId, watchStatus }) => {
         tmdbId,
       },
     },
-    data: {
-      watchStatus,
-    },
+    data: updateData,
   });
 
   return { msg: "success", result };
@@ -464,4 +472,168 @@ export const getTrendingAllDB = async () => {
 
   //console.log(result);
   return shuffle(result);
+};
+
+export const findWatchingOrWatched = async ({ tmdbIds, userId }) => {
+  const followedUsersData = await db.following.findMany({
+    where: {
+      followerId: userId,
+    },
+    include: {
+      following: {
+        include: {
+          watchlists: {
+            where: {
+              tmdbId: {
+                in: tmdbIds,
+              },
+              OR: [{ watchStatus: "watching" }, { watchStatus: "watched" }],
+            },
+            include: {
+              user: true, // Assuming you have a relation to `User` here to include user details
+            },
+          },
+        },
+      },
+    },
+  });
+
+  // Initialize a map to hold the user data structured by tmdbId
+  const tmdbIdMap = {};
+
+  // Populate tmdbIdMap with followed users' watchlists
+  followedUsersData.forEach(({ following }) => {
+    following.watchlists.forEach(
+      ({ tmdbId, watchStatus, watchDateTime, user }) => {
+        if (!tmdbIdMap[tmdbId]) {
+          tmdbIdMap[tmdbId] = {
+            users: [],
+            followedUsersCount: 0,
+            totalCount: 0,
+          };
+        }
+        tmdbIdMap[tmdbId].users.push({
+          userId: user.id,
+          name: user.name,
+          image: user.image,
+          watchStatus,
+          watchDateTime,
+        });
+        tmdbIdMap[tmdbId].followedUsersCount++;
+      }
+    );
+  });
+
+  // Query for total watch counts for each tmdbId and populate in tmdbIdMap
+  await Promise.all(
+    tmdbIds.map(async (id) => {
+      const totalWatchedCount = await db.watchlist.count({
+        where: {
+          tmdbId: id,
+          watchStatus: "watched",
+        },
+      });
+      // Update the totalCount directly in the map for each tmdbId
+      if (tmdbIdMap[id]) {
+        tmdbIdMap[id].totalCount = totalWatchedCount;
+        tmdbIdMap[id].remainingCount =
+          totalWatchedCount - tmdbIdMap[id].followedUsersCount;
+      } else {
+        // Initialize the entry if not present due to no followers watching
+        tmdbIdMap[id] = {
+          users: [],
+          followedUsersCount: 0,
+          totalCount: totalWatchedCount,
+          remainingCount: totalWatchedCount,
+        };
+      }
+    })
+  );
+
+  // Convert the map to an array of desired objects, now including totalCount and remainingCount
+  const result = Object.keys(tmdbIdMap).map((tmdbId) => ({
+    tmdbId: parseInt(tmdbId, 10),
+    users: tmdbIdMap[tmdbId].users,
+    totalCount: tmdbIdMap[tmdbId].totalCount,
+    remainingCount: tmdbIdMap[tmdbId].remainingCount,
+  }));
+
+  return result;
+};
+
+export const getTotalWatchForUserId = async ({ tmdbIds, userId }) => {
+  // Prepare an object to store the totalCount for each tmdbId
+  const totalCountMap = {};
+
+  // Query for total watch counts for each tmdbId excluding the specified userId
+  await Promise.all(
+    tmdbIds.map(async (id) => {
+      const totalCount = await db.watchlist.count({
+        where: {
+          tmdbId: id,
+          AND: [
+            // Ensure both conditions (tmdbId match and userId exclusion) are met
+            {
+              OR: [{ watchStatus: "watching" }, { watchStatus: "watched" }],
+            },
+            {
+              NOT: {
+                userId: userId, // Exclude entries related to the specified userId
+              },
+            },
+          ],
+        },
+      });
+      totalCountMap[id] = totalCount;
+    })
+  );
+
+  // Convert the totalCountMap to an array of desired objects
+  const result = Object.entries(totalCountMap).map(([tmdbId, totalCount]) => ({
+    tmdbId: parseInt(tmdbId, 10),
+    totalCount,
+  }));
+
+  return result;
+};
+
+export const getWatchedUsers = async ({ tmdbId }) => {
+  const watchlistEntries = await db.watchlist.findMany({
+    where: {
+      tmdbId: tmdbId,
+      OR: [{ watchStatus: "watching" }, { watchStatus: "watched" }],
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          image: true,
+        },
+      },
+    },
+  });
+
+  // Extract user data and additional watchlist information
+  const users = watchlistEntries.map((entry) => ({
+    ...entry.user, // Spread to include all selected user fields
+    watchStatus: entry.watchStatus, // This will now include both watching and watched statuses
+    watchDateTime: entry.watchDateTime,
+    rating: entry.rating, // Assuming 'rating' is a direct field on watchlistEntries
+  }));
+
+  return users;
+};
+
+export const updateRating = async ({ tmdbId, userId, rating }) => {
+  const updatedWatchlistEntry = await db.watchlist.updateMany({
+    where: {
+      tmdbId: tmdbId,
+      userId: userId,
+    },
+    data: {
+      rating: rating,
+    },
+  });
+  return { sucess: true };
 };

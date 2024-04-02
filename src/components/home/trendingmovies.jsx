@@ -1,6 +1,10 @@
 "use client";
 import { getIds, getIdsForSearch } from "@/lib/utils";
-import { getTrendingDB, getWatchStatus } from "@/services/serveractions";
+import {
+  getTotalWatchForUserId,
+  getTrendingDB,
+  getWatchStatus,
+} from "@/services/serveractions";
 import { getTrendingMovies } from "@/services/tmdb";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
@@ -29,7 +33,19 @@ export const TrendingMovies = () => {
       }),
     enabled: !!session?.user?.id && ids.length > 0,
   });
-  //console.log(data);
+  const { data: watchcountdata } = useQuery({
+    queryKey: [
+      "trendingmovieswatchcount",
+      { userId: session?.user?.id, tmdbIds: ids },
+    ],
+    queryFn: () =>
+      getTotalWatchForUserId({
+        tmdbIds: ids,
+        userId: session?.user?.id,
+      }),
+    enabled: !!session?.user?.id && ids.length > 0,
+  });
+  //console.log(watchcountdata);
   //console.log("watchdata-trendingmovies", watchdata);
   return (
     <>
@@ -39,6 +55,7 @@ export const TrendingMovies = () => {
         watchdata={watchdata}
         refetch={refetch}
         isLoading={isLoading}
+        watchCount={watchcountdata}
       />
     </>
   );

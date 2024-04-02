@@ -18,6 +18,9 @@ import {
 } from "@/services/serveractions";
 import Link from "next/link";
 import { toast } from "sonner";
+import { GiveRating } from "./giverating";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { PopoverClose } from "@radix-ui/react-popover";
 
 const DropdownMenuActions = ({ watchStatus, handleAction }) => {
   const menuItems = {
@@ -72,24 +75,22 @@ const DropdownMenuActions = ({ watchStatus, handleAction }) => {
   const button = ButtonContent[watchStatus];
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <Popover>
+      <PopoverTrigger asChild>
         <Button size="sm" className={`w-full ${button.color}`}>
           {button.text}
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="bg-black text-white">
+      </PopoverTrigger>
+      <PopoverContent className="bg-black text-white text-sm w-[200px] flex flex-col">
         {items.map((item, index) => (
-          <DropdownMenuItem
-            key={index}
-            onClick={item.action}
-            className="hover:bg-gray-700"
-          >
-            {item.text}
-          </DropdownMenuItem>
+          <PopoverClose key={index}>
+            <div onClick={item.action} className="hover:bg-red-500">
+              {item.text}
+            </div>
+          </PopoverClose>
         ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </PopoverContent>
+    </Popover>
   );
 };
 
@@ -163,7 +164,7 @@ export const WatchBigCard = ({ data, refetch }) => {
             <div>{getYear(data.releaseDate)}</div>
             <div className="flex flex-row items-center">
               <div>{Number(data.tmdbRating).toFixed(1)}</div>
-              <RatingIcon />
+              <RatingIcon className={"text-yellow-500"} />
             </div>
           </div>
           <div className="flex flex-row gap-1 flex-wrap">
@@ -176,6 +177,13 @@ export const WatchBigCard = ({ data, refetch }) => {
             watchStatus={data.watchStatus}
             handleAction={handleAction}
           />
+          {data.watchStatus === "watched" && (
+            <GiveRating
+              tmdbId={data.tmdbId}
+              userId={data.userId}
+              userRating={data.rating}
+            />
+          )}
 
           <div className="text-xs">{getWatchDate()} </div>
         </div>
@@ -300,6 +308,13 @@ export const WatchSmallCard = ({ data, refetch }) => {
           watchStatus={data.watchStatus}
           handleAction={handleAction}
         />
+        {data.watchStatus === "watched" && (
+          <GiveRating
+            tmdbId={data.tmdbId}
+            userId={data.userId}
+            userRating={data.rating}
+          />
+        )}
 
         <div className="text-xs font-thin px-2">{getWatchDate()}</div>
       </div>

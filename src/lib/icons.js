@@ -196,13 +196,13 @@ export const RightArrowIcon = () => (
   </svg>
 );
 
-export const RatingIcon = () => (
+export const RatingIcon = ({ className }) => (
   <svg
     stroke="currentColor"
     fill="currentColor"
     strokeWidth="0"
     viewBox="0 0 512 512"
-    className="text-yellow-500 mb-[1px]"
+    className={className}
     height="1em"
     width="1em"
     xmlns="http://www.w3.org/2000/svg"

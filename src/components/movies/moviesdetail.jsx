@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { getMovieDetailfromTmdb } from "@/services/tmdb";
 import { MovieDetailCard } from "../common/moviedetailcard";
 import { Recommendations } from "./recommendations";
+import { UserReviews } from "./userreviews";
 
 export const MoviesDetail = ({ tmdbId }) => {
   const { data: session } = useSession();
@@ -18,7 +19,7 @@ export const MoviesDetail = ({ tmdbId }) => {
     isLoading: isWatchStatusLoading,
     refetch,
   } = useQuery({
-    queryKey: ["moviedetail", { tmdbId: [tmdbId] }],
+    queryKey: ["moviedetailwatchstatus", { tmdbId: [tmdbId] }],
     queryFn: () =>
       getWatchStatus({
         userId: session?.user?.id,
@@ -26,8 +27,8 @@ export const MoviesDetail = ({ tmdbId }) => {
       }),
     enabled: !!session?.user?.id,
   });
-  console.log(data);
-  console.log(watchdata);
+  //console.log(data);
+  //console.log(watchdata);
   const matchingItem = watchdata?.find((item) => item.tmdbId === tmdbId);
   const watchStatus = matchingItem ? matchingItem.watchStatus : "";
   return (
@@ -39,6 +40,7 @@ export const MoviesDetail = ({ tmdbId }) => {
           refetch={refetch}
         />
       )}
+      <UserReviews tmdbId={tmdbId} />
       <Recommendations tmdbId={tmdbId} />
     </div>
   );

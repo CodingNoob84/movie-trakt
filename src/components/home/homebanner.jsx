@@ -14,7 +14,11 @@ import { useSession } from "next-auth/react";
 import { useQuery } from "@tanstack/react-query";
 import { getIds, getIdsForSearch } from "@/lib/utils";
 import { getTrending } from "@/services/tmdb";
-import { getTrendingAllDB, getWatchStatus } from "@/services/serveractions";
+import {
+  findWatchingOrWatched,
+  getTrendingAllDB,
+  getWatchStatus,
+} from "@/services/serveractions";
 import { useState } from "react";
 
 const baseURL = "https://image.tmdb.org/t/p/w500";
@@ -41,7 +45,20 @@ export const HomeBanner = () => {
       }),
     enabled: !!session?.user?.id && ids.length > 0,
   });
-  //console.log("watchdata", watchdata);
+
+  const { data: watchpeopledata, isLoading: isWatchPeopleLoading } = useQuery({
+    queryKey: [
+      "alltrendingwatchpeople",
+      { userId: session?.user?.id, tmdbIds: ids },
+    ],
+    queryFn: () =>
+      findWatchingOrWatched({
+        userId: session?.user?.id,
+        tmdbIds: ids,
+      }),
+    enabled: !!session?.user?.id && ids.length > 0,
+  });
+  //console.log("watchpeopledata", watchpeopledata);
   const [api, setApi] = useState();
   const autoplay = api?.plugins()?.autoplay;
   //console.log("api", api);
@@ -70,6 +87,7 @@ export const HomeBanner = () => {
               const matchingWatchData = watchdata?.find(
                 (watchItem) => watchItem.tmdbId === movie.tmdbId
               );
+
               return (
                 <CarouselItem key={i}>
                   <HomeBannerCard
@@ -77,6 +95,9 @@ export const HomeBanner = () => {
                     watchStatus={
                       matchingWatchData ? matchingWatchData.watchStatus : ""
                     }
+                    watchpeopledata={watchpeopledata?.find(
+                      (data) => data.tmdbId === movie.tmdbId
+                    )}
                     refetch={refetch}
                     autoplay={autoplay}
                   />

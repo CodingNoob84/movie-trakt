@@ -1,7 +1,7 @@
 "use client";
 import { getGenresString } from "@/data/genres";
 import { IMDBIcon } from "@/lib/icons";
-import { getTmDBImage } from "@/lib/utils";
+import { getTmDBImage, truncateText } from "@/lib/utils";
 import {
   addToWatchList,
   removeFromWatchList,
@@ -99,8 +99,14 @@ const DropdownMenuActions = ({ watchStatus, handleAction }) => {
   );
 };
 
-export const HomeBannerCard = ({ data, watchStatus, refetch, autoplay }) => {
-  //console.log(data);
+export const HomeBannerCard = ({
+  data,
+  watchStatus,
+  refetch,
+  autoplay,
+  watchpeopledata,
+}) => {
+  //console.log(watchpeopledata);
   const { data: session } = useSession();
   const prepareData = (status) => ({
     userId: session.user.id,
@@ -165,7 +171,10 @@ export const HomeBannerCard = ({ data, watchStatus, refetch, autoplay }) => {
             {data.mediaType}
           </span>
         </div>
-        <div className="text-xs text-gray-200 lg:w-2/4">{data?.overview}</div>
+        <div className="text-xs text-gray-200 lg:w-2/4">
+          {" "}
+          {truncateText(data?.overview || "", 50)}
+        </div>
         <div className="flex lg:w-1/4">
           {" "}
           <DropdownMenuActions
@@ -173,29 +182,27 @@ export const HomeBannerCard = ({ data, watchStatus, refetch, autoplay }) => {
             handleAction={handleAction}
           />
         </div>
-        {/* <div className="flex -space-x-1 items-center ">
-            <img
-              className="rounded-full w-7 h-7 shadow-lg border border-white"
-              src="https://api.lorem.space/image/face?w=32&amp;h=32&amp;hash=zsrj8csk"
-              alt=""
-              srcSet=""
-            />
-            <img
-              className="rounded-full w-7 h-7 shadow-lg border border-white"
-              src="https://api.lorem.space/image/face?w=32&amp;h=32&amp;hash=zsrj8cck"
-              alt=""
-              srcSet=""
-            />
-            <img
-              className="rounded-full w-7 h-7 shadow-lg border border-white"
-              src="https://api.lorem.space/image/face?w=32&amp;h=32&amp;hash=zsfj8cck"
-              alt=""
-              srcSet=""
-            />
+
+        <div className="flex -space-x-1 items-center ">
+          {watchpeopledata?.users?.length > 0 &&
+            watchpeopledata?.users?.map((user, i) => (
+              <img
+                key={i}
+                className="rounded-full w-7 h-7 shadow-lg border border-white"
+                src={user?.image}
+                alt={user?.name}
+                srcSet=""
+              />
+            ))}
+
+          {watchpeopledata?.totalCount > 0 && (
             <span className="pl-4 text-xs drop-shadow-lg">
-              +8 friends are watching
+              {watchpeopledata?.remainingCount > 0 &&
+                ` +${watchpeopledata.remainingCount} `}
+              friends are watching/watched
             </span>
-          </div> */}
+          )}
+        </div>
       </div>
     </div>
   );

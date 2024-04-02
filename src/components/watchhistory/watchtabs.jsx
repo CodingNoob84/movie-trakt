@@ -14,13 +14,14 @@ import useViewStore from "@/store/viewstore";
 export const WatchTabs = () => {
   const { data: session } = useSession();
   const [tab, setTab] = useState("watching");
-  // Using a hypothetical useContext hook to retrieve the current view state
-  const { view } = useViewStore(); // Assume this context provides the current view ("small" or "big")
+  const { view } = useViewStore();
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["watchhistory", { userId: session.user.id }],
     queryFn: () => getWatchHistoryByUserId({ userId: session.user.id }),
   });
+
+  console.log(data);
 
   const renderWatchCards = (items) => {
     return items.map((item, i) =>

@@ -6,7 +6,14 @@ import { useState } from "react";
 import { MovieCard } from "../common/moviecard";
 import { WatchSmallCardLoader } from "../common/watchcard";
 
-export const MoviesRow = ({ title, data, watchdata, refetch, isLoading }) => {
+export const MoviesRow = ({
+  title,
+  data,
+  watchdata,
+  refetch,
+  isLoading,
+  watchCount,
+}) => {
   const options = {
     align: "start",
     loop: "true",
@@ -34,12 +41,12 @@ export const MoviesRow = ({ title, data, watchdata, refetch, isLoading }) => {
         </div>
         {isLoading ? (
           <>
-            <div className="mt-4 lg:hidden flex flex-row">
+            <div className="mt-4 lg:hidden flex flex-row gap-4">
               {Array.from({ length: 2 }, (_, i) => (
                 <WatchSmallCardLoader key={i} className="basis-auto" />
               ))}
             </div>
-            <div className="hidden mt-4 lg:flex flex-row">
+            <div className="hidden mt-4 lg:flex flex-row gap-4">
               {Array.from({ length: 5 }, (_, i) => (
                 <WatchSmallCardLoader key={i} />
               ))}
@@ -58,6 +65,10 @@ export const MoviesRow = ({ title, data, watchdata, refetch, isLoading }) => {
                       data={movie}
                       watchStatus={
                         matchingWatchData ? matchingWatchData.watchStatus : ""
+                      }
+                      watchCount={
+                        watchCount?.find((item) => item.tmdbId === movie.tmdbId)
+                          ?.totalCount || 0
                       }
                       refetch={refetch}
                     />

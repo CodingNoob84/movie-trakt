@@ -110,7 +110,7 @@ export const SearchCard = ({ data, watchStatus, refetch }) => {
           <Badge>{data?.media_type}</Badge>
           <span className="flex gap-1 items-center">
             <span>{Number(data?.vote_average).toFixed(1)}</span>
-            <RatingIcon />
+            <RatingIcon className={"text-yellow-500"} />
           </span>
         </div>
         <div className="flex flex-row gap-1 flex-wrap text-xs">

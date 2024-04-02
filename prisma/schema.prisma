@@ -60,6 +60,7 @@ model Watchlist {
   rating      Float?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  watchDateTime DateTime? 
   userId      String
   tmdbId      Int
   movie       Movie    @relation(fields: [tmdbId], references: [tmdbId])

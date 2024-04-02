@@ -11,7 +11,7 @@ import { Skeleton } from "../ui/skeleton";
 
 export const TrendingUpdateCard = ({ type }) => {
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ["trendingmovies"],
+    queryKey: ["trendingCountTime", { type: type }],
     queryFn: () => getCountAndLastUpdatedTime(type),
   });
   console.log(data);
@@ -31,8 +31,8 @@ export const TrendingUpdateCard = ({ type }) => {
   return (
     <div className="w-full flex flex-row border rounded-md p-5 justify-center items-center border-red-600 gap-5">
       <div>
-        last updated at{" "}
-        {!isLoading && format(data?.lastUpdated, "EEE, d MMM p")}{" "}
+        last updated at
+        {!isLoading && format(data?.lastUpdated, "  EEE, d MMM p ")}{" "}
       </div>
       <Button onClick={() => handleTrendingMovies()}>
         Trending {type === "movie" ? "Movies" : "TvSeries"}

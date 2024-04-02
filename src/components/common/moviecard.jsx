@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 import { getGenresString } from "@/data/genres";
 import { Skeleton } from "../ui/skeleton";
+import { useState } from "react";
 
 const DropdownMenuActions = ({ watchStatus, handleAction }) => {
   const menuItems = {
@@ -100,8 +101,10 @@ const DropdownMenuActions = ({ watchStatus, handleAction }) => {
   );
 };
 
-export const MovieCard = ({ data, watchStatus, refetch }) => {
+export const MovieCard = ({ data, watchStatus, refetch, watchCount }) => {
+  //console.log("count", watchCount);
   const { data: session } = useSession();
+  const [isLoading, setIsLoading] = useState(false);
   const prepareData = (status) => ({
     userId: session.user.id,
     watchStatus: status,
@@ -109,6 +112,7 @@ export const MovieCard = ({ data, watchStatus, refetch }) => {
   });
 
   const handleAction = async (action, status) => {
+    setIsLoading(true);
     try {
       let response;
       if (action === "add") {
@@ -137,9 +141,11 @@ export const MovieCard = ({ data, watchStatus, refetch }) => {
         refetch();
         toast.success(`Movie marked as ${status}`);
       }
+      setIsLoading(false);
     } catch (error) {
       console.error(`Failed to ${action} watch status:`, error);
       toast.error(`Failed to ${action} watch status.`);
+      setIsLoading(false);
     }
   };
 
@@ -171,16 +177,27 @@ export const MovieCard = ({ data, watchStatus, refetch }) => {
             <span>
               {Number(data?.vote_average || data?.tmdbRating).toFixed(1)}
             </span>
-            <RatingIcon />
+            <RatingIcon className={"text-yellow-500"} />
           </span>
         </div>
 
-        <DropdownMenuActions
-          watchStatus={watchStatus}
-          handleAction={handleAction}
-        />
-
-        <div className="text-xs px-2">friends are watching</div>
+        {isLoading ? (
+          <Button size="sm" className={`w-full bg-violet-300`}>
+            Loading...
+          </Button>
+        ) : (
+          <DropdownMenuActions
+            watchStatus={watchStatus}
+            handleAction={handleAction}
+          />
+        )}
+        {parseInt(watchCount) === 0 ? (
+          ""
+        ) : parseInt(watchCount) === 1 ? (
+          <div className="text-xs px-2">{watchCount} friend is watching</div>
+        ) : (
+          <div className="text-xs px-2">{watchCount} friends are watching</div>
+        )}
       </div>
     </div>
   );
