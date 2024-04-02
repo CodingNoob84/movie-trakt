@@ -21,8 +21,6 @@ import {
 } from "@/services/serveractions";
 import { useState } from "react";
 
-const baseURL = "https://image.tmdb.org/t/p/w500";
-
 export const HomeBanner = () => {
   const { data: session } = useSession();
   const { data, isLoading } = useQuery({
@@ -48,7 +46,7 @@ export const HomeBanner = () => {
 
   const { data: watchpeopledata, isLoading: isWatchPeopleLoading } = useQuery({
     queryKey: [
-      "alltrendingwatchpeople",
+      "trendingwatchpeople",
       { userId: session?.user?.id, tmdbIds: ids },
     ],
     queryFn: () =>

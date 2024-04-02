@@ -28,8 +28,7 @@ export const SearchBar = () => {
   };
 
   return (
-    <div className="border-[0.4px] w-[150px] md:flex border-opacity-20 px-3 py-4 border-light-white flex items-center font-light gap-3 text-light-white rounded-2xl h-7 transition-all duration-300 ease-in-out hover:w-[300px]">
-      <SearchIcon />
+    <div className="border-[0.4px] w-[150px] md:flex border-opacity-20 px-4 py-4 border-light-white flex items-center font-light gap-3 text-light-white rounded-2xl h-7 transition-all duration-300 ease-in-out ">
       <input
         type="text"
         placeholder="Search Everything"

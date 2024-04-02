@@ -15,7 +15,8 @@ export const NavBar = () => {
             </div>
             <LogoIcon />
             <div className="tracking-wide hidden md:block dark:text-white">
-              MovieTrakt<span className="text-red-600">.</span>
+              <span className="text-red-600">Movie</span>Trakt
+              <span className="text-red-600">.</span>
             </div>
           </div>
           <div className="w-3/4 flex flex-row items-center">

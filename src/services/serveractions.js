@@ -637,3 +637,14 @@ export const updateRating = async ({ tmdbId, userId, rating }) => {
   });
   return { sucess: true };
 };
+
+export const updateUserRole = async (userId) => {
+  return db.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      role: "user",
+    },
+  });
+};
